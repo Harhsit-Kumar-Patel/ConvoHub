@@ -3,19 +3,16 @@ import { getUser, isAuthed, logout } from '../lib/auth.js';
 import { Button } from './ui/button.jsx';
 import { Icons } from './Icons.jsx';
 
-const professionalLinks = [
-    { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
-    { to: '/projects', label: 'Projects', icon: Icons.chat }, // Re-using icon for brevity
-    { to: '/meetings', label: 'Meetings', icon: Icons.dm },
-    { to: '/profile', label: 'Profile', icon: Icons.profile },
-];
-
-const educationalLinks = [
-    { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
-    { to: '/assignments', label: 'Assignments', icon: Icons.notice },
-    { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
-    { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
-    { to: '/profile', label: 'Profile', icon: Icons.profile },
+// Unified navigation so that all primary features are always visible
+const commonLinks = [
+  { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
+  { to: '/notices', label: 'Notices', icon: Icons.notice },
+  { to: '/assignments', label: 'Assignments', icon: Icons.notice },
+  { to: '/projects', label: 'Projects', icon: Icons.chat }, // Re-using icon for brevity
+  { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
+  { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
+  { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
+  { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
 export default function Sidebar({ isMobileOpen = false, onMobileClose = () => {} }) {
@@ -23,7 +20,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => {}
   const user = getUser();
   const authed = isAuthed();
 
-  const navLinks = user?.workspaceType === 'professional' ? professionalLinks : educationalLinks;
+  const navLinks = commonLinks;
 
   const handleLogout = () => {
     logout();

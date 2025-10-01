@@ -15,6 +15,8 @@ import Profile from './pages/Profile.jsx';
 import Assignments from './pages/Assignments.jsx';
 import AssignmentDetail from './pages/AssignmentDetail.jsx';
 import Projects from './pages/Projects.jsx';
+import ProjectBoard from './pages/ProjectBoard.jsx';
+import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
 
 
 export default function App() {
@@ -23,6 +25,7 @@ export default function App() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
+    <ToastProvider>
     <div className={`flex h-screen ${isAuthPage ? '' : 'bg-background'}`}>
       {!isAuthPage && (
         <>
@@ -52,8 +55,11 @@ export default function App() {
           <Route path="/assignments/:id" element={<ProtectedRoute><AssignmentDetail /></ProtectedRoute>} />
 
           <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+          <Route path="/projects/:id" element={<ProtectedRoute><ProjectBoard /></ProtectedRoute>} />
         </Routes>
       </main>
+      <ToastViewport />
     </div>
+    </ToastProvider>
   );
 }

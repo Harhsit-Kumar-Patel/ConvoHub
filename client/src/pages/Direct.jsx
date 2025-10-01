@@ -67,11 +67,16 @@ export default function Direct() {
           {toUser ? (
             <div className="flex items-center justify-between border rounded-lg p-3 bg-white mb-2">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border flex items-center justify-center text-xs font-semibold">
+                <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border flex items-center justify-center text-xs font-semibold">
                   {(toUser.name || 'U').split(' ').map((w)=>w[0]).slice(0,2).join('').toUpperCase()}
+                  {/* Presence dot (placeholder) */}
+                  <span className="absolute -right-1 -bottom-1 h-3 w-3 rounded-full bg-emerald-500 border border-white" title="Online" />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-medium truncate">{toUser.name}</div>
+                  <div className="font-medium truncate flex items-center gap-2">
+                    <span className="truncate">{toUser.name}</span>
+                    <span className="text-[11px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200">Online</span>
+                  </div>
                   <div className="text-xs text-slate-500 truncate">{toUser.email}</div>
                 </div>
               </div>

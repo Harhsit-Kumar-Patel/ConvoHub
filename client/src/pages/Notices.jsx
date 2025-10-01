@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs.jsx';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -10,6 +11,8 @@ export default function Notices() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('all');
   const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -75,7 +78,8 @@ export default function Notices() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.03 * i }}
-            className="rounded-2xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur p-4 shadow"
+            className="rounded-2xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur p-4 shadow cursor-pointer hover:border-primary/40"
+            onClick={()=>{ setSelected(n); setOpen(true); }}
           >
             <div className="flex items-center gap-2">
               {n.pinned && (
@@ -97,6 +101,24 @@ export default function Notices() {
           )
         )}
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          {selected && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selected.title}</DialogTitle>
+                <DialogDescription>
+                  By {selected.author || 'Admin'} • {new Date(selected.createdAt).toLocaleString()}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-2 whitespace-pre-wrap text-sm leading-6">
+                {selected.body}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

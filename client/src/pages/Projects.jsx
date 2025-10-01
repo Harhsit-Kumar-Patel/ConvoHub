@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -49,7 +50,9 @@ export default function Projects() {
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
-                            <Button variant="outline" size="sm">View Board</Button>
+                            <Button asChild variant="outline" size="sm">
+                                <Link to={`/projects/${project._id}`} state={{ project }}>View Board</Link>
+                            </Button>
                         </CardContent>
                     </Card>
                 ))}

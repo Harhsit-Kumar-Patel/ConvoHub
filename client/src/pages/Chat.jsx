@@ -1,14 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import api from '../lib/api.js';
 import { getSocket } from '../lib/socket.js';
 import { getUser } from '../lib/auth.js';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip.jsx';
 
 export default function Chat() {
   const [cohorts, setCohorts] = useState([]);
   const [cohortId, setCohortId] = useState('');
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [typing, setTyping] = useState(false);
+  const typingTimer = useRef(null);
 
   const socket = useMemo(() => getSocket(), []);
 
@@ -40,6 +43,13 @@ export default function Chat() {
     if (!input.trim() || !cohortId) return;
     await api.post('/messages', { body: input, cohortId });
     setInput('');
+  }
+
+  function onInputChange(e) {
+    setInput(e.target.value);
+    setTyping(true);
+    clearTimeout(typingTimer.current);
+    typingTimer.current = setTimeout(() => setTyping(false), 1200);
   }
 
   return (
@@ -80,9 +90,49 @@ export default function Chat() {
         })}
         </AnimatePresence>
       </div>
-      <div className="mt-1 flex gap-2">
-        <input className="flex-1 border rounded-lg px-3 py-2 bg-white/80 backdrop-blur" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Type a message" />
-        <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} onClick={send} className="px-4 py-2 rounded-lg bg-slate-900 text-white shadow">Send</motion.button>
+      {/* Composer */}
+      <div className="mt-1">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <input
+              className="w-full border rounded-lg pl-10 pr-24 py-2 bg-white/80 backdrop-blur"
+              value={input}
+              onChange={onInputChange}
+              onKeyDown={(e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } }}
+              placeholder="Type a message"
+            />
+            {/* Left icons */}
+            <TooltipProvider>
+              <div className="absolute left-2 top-1.5 flex items-center gap-2 text-slate-500">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="hover:text-slate-700" aria-label="Emoji picker">😊</button>
+                  </TooltipTrigger>
+                  <TooltipContent>Emoji</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="hover:text-slate-700" aria-label="Attach file">📎</button>
+                  </TooltipTrigger>
+                  <TooltipContent>Attach</TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+            {/* Right actions */}
+            <TooltipProvider>
+              <div className="absolute right-2 top-1.5 flex items-center gap-2">
+                <span className="text-xs text-slate-500 hidden sm:inline">Enter to send</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }} onClick={send} className="px-3 py-1.5 rounded-md bg-slate-900 text-white text-sm">Send</motion.button>
+                  </TooltipTrigger>
+                  <TooltipContent>Send message</TooltipContent>
+                </Tooltip>
+              </div>
+            </TooltipProvider>
+          </div>
+        </div>
+        {typing && <div className="mt-1 text-xs text-slate-500">Typing…</div>}
       </div>
     </section>
   );

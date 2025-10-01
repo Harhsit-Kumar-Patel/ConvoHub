@@ -38,18 +38,99 @@ export default function Dashboard() {
           <p className="text-muted-foreground">A quick overview of your ConvoHub activity.</p>
         </header>
 
+        {/* Quick Actions */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm"><Link to="/notices">View Notices</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/assignments">Assignments</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/projects">Projects</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/chat">Cohort Chat</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/direct">Direct Messages</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/complaints">Complaint Box</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/profile">Profile</Link></Button>
+          </div>
+        </motion.div>
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <StatCard title="Notices" description={`${notices.length} Recent`} icon={Icons.notice} colorClass="bg-primary" />
           <StatCard title="Recent DMs" description={`${threads.length} Threads`} icon={Icons.dm} colorClass="bg-secondary" />
           <StatCard title="Your Cohort" description="Alpha 2025" icon={Icons.chat} colorClass="bg-green-500" />
         </div>
 
+        {/* Feature Shortcuts */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Link to="/assignments" className="block group">
+            <Card className="h-full hover:border-primary/40 transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Assignments</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center shadow-sm"><Icons.notice className="w-5 h-5 text-white"/></div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">View tasks, due dates, and submit work.</p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/projects" className="block group">
+            <Card className="h-full hover:border-primary/40 transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Projects</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center shadow-sm"><Icons.chat className="w-5 h-5 text-white"/></div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">View boards, add tasks, and track progress.</p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/notices" className="block group">
+            <Card className="h-full hover:border-primary/40 transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Notices</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm"><Icons.notice className="w-5 h-5 text-white"/></div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">See announcements. Filter by pinned, search content.</p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/complaints" className="block group">
+            <Card className="h-full hover:border-primary/40 transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Complaint Box</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-rose-500 flex items-center justify-center shadow-sm"><Icons.dm className="w-5 h-5 text-white"/></div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Submit feedback or issues, anonymously if you like.</p>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/profile" className="block group">
+            <Card className="h-full hover:border-primary/40 transition-colors">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Profile</CardTitle>
+                <div className="w-8 h-8 rounded-lg bg-gray-500 flex items-center justify-center shadow-sm"><Icons.profile className="w-5 h-5 text-white"/></div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Edit basics, links, and skills with tabs.</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-2">
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
             <Card className="hover:border-primary/40 transition-colors">
               <CardHeader>
-                <CardTitle>Recent Notices</CardTitle>
-                <CardDescription>The latest announcements and updates.</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recent Notices</CardTitle>
+                    <CardDescription>The latest announcements and updates.</CardDescription>
+                  </div>
+                  <Link className="text-sm text-primary hover:underline" to="/notices">View all</Link>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -71,8 +152,13 @@ export default function Dashboard() {
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25, delay: 0.05 }}>
             <Card className="hover:border-secondary/40 transition-colors">
               <CardHeader>
-                <CardTitle>Recent DMs</CardTitle>
-                <CardDescription>Your latest one-on-one conversations.</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recent DMs</CardTitle>
+                    <CardDescription>Your latest one-on-one conversations.</CardDescription>
+                  </div>
+                  <Link className="text-sm text-secondary hover:underline" to="/direct">View all</Link>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
