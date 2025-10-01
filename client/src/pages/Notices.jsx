@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs.jsx';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function Notices() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState('all');
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -17,11 +20,39 @@ export default function Notices() {
       .finally(() => setLoading(false));
   }, []);
 
+  const filtered = useMemo(() => {
+    let arr = [...items];
+    if (tab === 'pinned') arr = arr.filter((n) => n.pinned);
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      arr = arr.filter((n) => (n.title || '').toLowerCase().includes(q) || (n.body || '').toLowerCase().includes(q));
+    }
+    return arr;
+  }, [items, tab, query]);
+
   return (
     <section className="p-6">
-      <div className="mb-5">
+      <div className="mb-5 space-y-3">
         <h2 className="text-3xl font-extrabold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-info via-accent to-secondary">Notices</h2>
         <p className="text-slate-600 dark:text-slate-400">Stay in the loop with the latest announcements.</p>
+        <div className="flex flex-col md:flex-row md:items-center gap-3">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList>
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="pinned">Pinned</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="relative max-w-sm md:ml-auto">
+            <input
+              value={query}
+              onChange={(e)=>setQuery(e.target.value)}
+              className="w-full rounded-lg border bg-background pl-9 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Search notices..."
+              aria-label="Search notices"
+            />
+            <svg className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+        </div>
       </div>
       <div className="grid gap-4">
         {loading && (
@@ -37,7 +68,7 @@ export default function Notices() {
             </div>
           ))
         )}
-        {items.map((n, i) => (
+        {filtered.map((n, i) => (
           <motion.div
             key={n._id}
             initial={{ opacity: 0, y: 10 }}
@@ -58,7 +89,7 @@ export default function Notices() {
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">By {n.author || 'Admin'} • {new Date(n.createdAt).toLocaleString()}</p>
           </motion.div>
         ))}
-        {items.length === 0 && (
+        {filtered.length === 0 && (
           !loading && (
             <div className="rounded-2xl border border-dashed bg-white/40 dark:bg-slate-900/40 backdrop-blur p-6 text-center text-slate-500 dark:text-slate-400">
               No notices yet.

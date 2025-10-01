@@ -1,6 +1,8 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Sidebar from './components/Sidebar.jsx';
+import Header from './components/Header.jsx';
 
 // Import all pages
 import Dashboard from './pages/Dashboard.jsx';
@@ -18,11 +20,20 @@ import Projects from './pages/Projects.jsx';
 export default function App() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/auth';
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
     <div className={`flex h-screen ${isAuthPage ? '' : 'bg-background'}`}>
-      {!isAuthPage && <Sidebar />}
+      {!isAuthPage && (
+        <>
+          {/* Mobile overlay */}
+          <Sidebar isMobileOpen={mobileSidebarOpen} onMobileClose={() => setMobileSidebarOpen(false)} />
+        </>
+      )}
       <main className="flex-1 overflow-y-auto">
+        {!isAuthPage && (
+          <Header onOpenMobileSidebar={() => setMobileSidebarOpen(true)} />
+        )}
         <Routes>
           {/* Public Auth Route */}
           <Route path="/auth" element={<Auth />} />
@@ -40,7 +51,6 @@ export default function App() {
           <Route path="/assignments" element={<ProtectedRoute><Assignments /></ProtectedRoute>} />
           <Route path="/assignments/:id" element={<ProtectedRoute><AssignmentDetail /></ProtectedRoute>} />
 
-          {/* Professional Routes */}
           <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
         </Routes>
       </main>

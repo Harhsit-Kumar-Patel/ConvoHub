@@ -37,6 +37,9 @@
     --ring: 175 60% 45%;
 
     --radius: 0.75rem;
+    /* Accessibility */
+    --font-scale: 1;
+    --contrast-multiplier: 1;
   }
 
   .dark {
@@ -80,6 +83,8 @@
     @apply bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
+  /* Scale base font size using CSS variable for accessibility */
+  html { font-size: calc(16px * var(--font-scale)); }
 }
 
 @layer utilities {

@@ -18,12 +18,11 @@ const educationalLinks = [
     { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
-
-export default function Sidebar() {
+export default function Sidebar({ isMobileOpen = false, onMobileClose = () => {} }) {
   const location = useLocation();
   const user = getUser();
   const authed = isAuthed();
-  
+
   const navLinks = user?.workspaceType === 'professional' ? professionalLinks : educationalLinks;
 
   const handleLogout = () => {
@@ -35,8 +34,8 @@ export default function Sidebar() {
     return null; // Don't render sidebar on auth page
   }
 
-  return (
-    <aside className="w-64 flex-shrink-0 bg-card border-r p-4 flex flex-col justify-between">
+  const SidebarBody = (
+    <div className="w-64 bg-card border-r p-4 h-full flex flex-col justify-between">
       <div>
         <div className="p-4 flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
@@ -47,24 +46,21 @@ export default function Sidebar() {
           </Link>
         </div>
         <nav className="mt-8 space-y-1">
-            {navLinks.map(link => {
-                 const isActive = location.pathname.startsWith(link.to);
-                 return (
-                    <Link
-                        key={link.to}
-                        to={link.to}
-                        className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                            ${isActive
-                                ? 'bg-secondary/10 text-secondary'
-                                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                            }`
-                        }
-                    >
-                        <link.icon className="w-5 h-5" />
-                        <span>{link.label}</span>
-                    </Link>
-                 )
-            })}
+          {navLinks.map(link => {
+            const isActive = location.pathname.startsWith(link.to);
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={onMobileClose}
+                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                  ${isActive ? 'bg-secondary/10 text-secondary' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}
+              >
+                <link.icon className="w-5 h-5" />
+                <span>{link.label}</span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
       <div>
@@ -76,6 +72,25 @@ export default function Sidebar() {
           </Button>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex md:flex-col md:h-screen md:sticky md:top-0">
+        {SidebarBody}
+      </aside>
+
+      {/* Mobile drawer */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/40" onClick={onMobileClose} />
+          <div className="absolute left-0 top-0 h-full shadow-lg animate-in slide-in-from-left w-64 bg-card border-r">
+            {SidebarBody}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
