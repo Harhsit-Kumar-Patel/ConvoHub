@@ -15,12 +15,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    /* Primary color (Purple) */
-    --primary: 250 53% 53%;
+    /* Primary color (Vibrant Teal) */
+    --primary: 175 60% 45%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary color (Blue) */
-    --secondary: 217 91% 60%;
+    /* Secondary color (Warm Coral) */
+    --secondary: 10 80% 60%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 240 4.8% 95.9%;
@@ -34,7 +34,7 @@
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 250 53% 53%;
+    --ring: 175 60% 45%;
 
     --radius: 0.75rem;
   }
@@ -49,12 +49,12 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    /* Primary color (Purple) */
-    --primary: 250 53% 53%;
+    /* Primary color (Vibrant Teal) */
+    --primary: 175 60% 45%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary color (Blue) */
-    --secondary: 217 91% 60%;
+    /* Secondary color (Warm Coral) */
+    --secondary: 10 80% 60%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 240 3.7% 15.9%;
@@ -80,4 +80,32 @@
     @apply bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
+}
+
+@layer utilities {
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+@keyframes blob {
+	0% {
+		transform: translate(0px, 0px) scale(1);
+	}
+	33% {
+		transform: translate(30px, -50px) scale(1.1);
+	}
+	66% {
+		transform: translate(-20px, 20px) scale(0.9);
+	}
+	100% {
+		transform: translate(0px, 0px) scale(1);
+	}
 }

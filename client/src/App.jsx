@@ -14,6 +14,7 @@ import Assignments from './pages/Assignments.jsx';
 import AssignmentDetail from './pages/AssignmentDetail.jsx';
 import Projects from './pages/Projects.jsx';
 
+
 export default function App() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/auth';

@@ -13,7 +13,7 @@ export default function Landing() {
       />
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute -bottom-16 -right-16 h-80 w-80 rounded-full bg-accent blur-3xl opacity-30"
+        className="pointer-events-none absolute -bottom-16 -right-16 h-80 w-80 rounded-full bg-secondary blur-3xl opacity-30"
         animate={{ scale: [1, 1.05, 1], x: [0, -15, 0], y: [0, 10, 0] }}
         transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
       />
