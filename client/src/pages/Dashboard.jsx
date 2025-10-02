@@ -53,6 +53,7 @@ export default function Dashboard() {
     const [activityFeed, setActivityFeed] = useState([]);
     const [loading, setLoading] = useState(true);
     const user = getUser();
+    const mode = (user?.workspaceType === 'professional' || user?.workspaceType === 'educational') ? user.workspaceType : 'educational';
 
     useEffect(() => {
         const fetchData = async () => {
@@ -98,23 +99,42 @@ export default function Dashboard() {
                 className="p-6 rounded-lg bg-gradient-to-r from-primary/80 to-secondary/80 text-primary-foreground shadow-lg"
             >
                 <h1 className="text-3xl font-bold font-heading">Welcome Back, {user?.name || 'User'}!</h1>
-                <p className="mt-1 opacity-90">Here’s what’s happening in your workspace today.</p>
+                <p className="mt-1 opacity-90">Here’s what’s happening in your {mode === 'educational' ? 'educational' : 'professional'} workspace today.</p>
+                <div className="mt-3 text-xs md:text-sm opacity-80">{new Date().toLocaleString()}</div>
             </motion.div>
 
-            {/* Quick Actions */}
-            <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                 <Button asChild variant="outline" className="h-auto py-3"><Link to="/direct">New Message</Link></Button>
-                 <Button asChild variant="outline" className="h-auto py-3"><Link to="/projects">View Projects</Link></Button>
-                 <Button asChild variant="outline" className="h-auto py-3"><Link to="/assignments">Assignments</Link></Button>
-                 <Button asChild variant="outline" className="h-auto py-3"><Link to="/complaints">Submit Feedback</Link></Button>
+            {/* Essential Links */}
+            <motion.div variants={itemVariants}>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    <Button asChild variant="outline" className="h-auto py-3"><Link to="/direct">{mode === 'educational' ? 'New Chat' : 'New Message'}</Link></Button>
+                    <Button asChild variant="outline" className="h-auto py-3"><Link to={mode === 'educational' ? '/courses' : '/projects'}>{mode === 'educational' ? 'Courses' : 'Projects'}</Link></Button>
+                    <Button asChild variant="outline" className="h-auto py-3"><Link to="/notices">{mode === 'educational' ? 'Announcements' : 'Notices'}</Link></Button>
+                    {mode === 'professional' && (
+                        <>
+                            <Button asChild variant="outline" className="h-auto py-3"><Link to="/teams">Team Chat</Link></Button>
+                            <Button asChild variant="outline" className="h-auto py-3"><Link to="/explore-teams">Explore Teams</Link></Button>
+                            <Button asChild variant="outline" className="h-auto py-3"><Link to="/directory">Directory</Link></Button>
+                        </>
+                    )}
+                    {mode === 'educational' && (
+                        <>
+                            <Button asChild variant="outline" className="h-auto py-3"><Link to="/assignments">Assignments</Link></Button>
+                            <Button asChild variant="outline" className="h-auto py-3"><Link to="/chat">Cohort Chat</Link></Button>
+                            <Button asChild variant="outline" className="h-auto py-3"><Link to="/grades">Grades</Link></Button>
+                        </>
+                    )}
+                    <Button asChild variant="outline" className="h-auto py-3"><Link to="/complaints">{mode === 'educational' ? 'Report Issue' : 'Feedback'}</Link></Button>
+                    <Button asChild variant="outline" className="h-auto py-3"><Link to="/profile">Profile</Link></Button>
+                </div>
             </motion.div>
 
             {/* Stat Cards */}
             <motion.div variants={containerVariants} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard title="Active Notices" value={`${stats.notices}`} icon={Icons.notice} colorClass="bg-blue-500" />
-                <StatCard title="Recent DMs" value={`${stats.threads}`} icon={Icons.dm} colorClass="bg-purple-500" />
-                <StatCard title="Your Cohort" value="Alpha 2025" icon={Icons.chat} colorClass="bg-green-500" />
+                <StatCard title={mode === 'educational' ? 'Announcements' : 'Active Notices'} value={`${stats.notices}`} icon={Icons.notice} colorClass="bg-blue-500" />
+                <StatCard title={mode === 'educational' ? 'Active Threads' : 'Recent DMs'} value={`${stats.threads}`} icon={Icons.dm} colorClass="bg-purple-500" />
+                <StatCard title={mode === 'educational' ? 'Your Batch' : 'Your Cohort'} value={mode === 'educational' ? (user?.batch || '2025') : 'Alpha 2025'} icon={Icons.chat} colorClass="bg-green-500" />
             </motion.div>
+            {/* Minimal dashboard: condensed layout */}
 
             {/* Activity Feed */}
             <motion.div variants={itemVariants}>

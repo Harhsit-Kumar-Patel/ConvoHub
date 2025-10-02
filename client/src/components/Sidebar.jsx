@@ -6,6 +6,7 @@ import { Icons } from './Icons.jsx';
 const educationalLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
   { to: '/courses', label: 'Courses', icon: Icons.notice },
+  { to: '/notices', label: 'Announcements', icon: Icons.notice },
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
   { to: '/grades', label: 'Grades', icon: Icons.chat },
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
@@ -18,6 +19,8 @@ const professionalLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
   { to: '/projects', label: 'Projects', icon: Icons.chat },
   { to: '/teams', label: 'Team Chat', icon: Icons.chat },
+  { to: '/explore-teams', label: 'Explore Teams', icon: Icons.chat },
+  { to: '/notices', label: 'Notices', icon: Icons.notice },
   { to: '/directory', label: 'Directory', icon: Icons.profile },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
