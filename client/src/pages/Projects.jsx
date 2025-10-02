@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Icons } from '../components/Icons';
 
@@ -23,33 +23,11 @@ export default function Projects() {
     }, []);
 
     if (loading) {
-        return (
-            <div className="p-8 space-y-8">
-                <header>
-                    <h1 className="text-4xl font-bold font-heading">Projects</h1>
-                    <p className="text-muted-foreground">Loading your team's projects...</p>
-                </header>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(3)].map((_, i) => (
-                        <Card key={i}>
-                            <CardHeader>
-                                <div className="h-6 bg-muted rounded w-3/4 animate-pulse"></div>
-                                <div className="h-4 bg-muted rounded w-1/2 mt-2 animate-pulse"></div>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="h-4 bg-muted rounded w-full mb-2 animate-pulse"></div>
-                                <div className="h-4 bg-muted rounded w-5/6 mb-4 animate-pulse"></div>
-                                <div className="h-9 bg-muted rounded w-28 animate-pulse"></div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        );
+        return <div className="p-8">Loading projects...</div>;
     }
 
     return (
-        <div className="p-8 space-y-8">
+        <div className="p-8 space-y-6">
             <header className="flex justify-between items-center">
                 <div>
                     <h1 className="text-4xl font-bold font-heading">Projects</h1>
@@ -61,20 +39,24 @@ export default function Projects() {
                 </Button>
             </header>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {projects.map(project => (
-                    <Card key={project._id} className="hover:border-primary/50 transition-colors shadow-sm">
-                        <CardHeader>
-                            <CardTitle>{project.name}</CardTitle>
-                            <CardDescription>
-                                {project.tasks.length} tasks
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
-                            <Button asChild variant="outline" size="sm">
-                                <Link to={`/projects/${project._id}`} state={{ project }}>View Board</Link>
-                            </Button>
+            <div className="space-y-4">
+                {projects.map((project) => (
+                    <Card key={project._id} className="transition-all hover:shadow-md">
+                        <CardContent className="p-4 flex flex-col md:flex-row items-start md:items-center gap-4">
+                            <div className="flex-1">
+                                <h3 className="font-semibold text-lg">{project.name}</h3>
+                                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{project.description}</p>
+                            </div>
+                            <div className="w-full md:w-auto flex items-center justify-between gap-4">
+                                <div className="text-sm text-muted-foreground text-left md:text-center w-32">
+                                    <span className="font-medium text-foreground">{project.tasks.length}</span> Tasks
+                                </div>
+                                <div className="w-28 text-right">
+                                    <Button asChild variant="outline" size="sm">
+                                        <Link to={`/projects/${project._id}`} state={{ project }}>View Board</Link>
+                                    </Button>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
                 ))}
