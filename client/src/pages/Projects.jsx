@@ -4,6 +4,7 @@ import api from '../lib/api';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Icons } from '../components/Icons';
+import { getUser } from '@/lib/auth';
 import { motion } from 'framer-motion';
 
 const containerVariants = {
@@ -20,27 +21,28 @@ const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
         y: 0,
-        opacity: 1,
     },
 };
 
 
 export default function Projects() {
-    const [projects, setProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const user = getUser();
+  const isAdmin = user?.role === 'admin';
 
-    useEffect(() => {
-        api.get('/projects')
-            .then(res => {
-                setProjects(res.data);
-            })
-            .catch(err => {
-                console.error("Failed to fetch projects", err);
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
+  useEffect(() => {
+    api.get('/projects')
+      .then(res => {
+        setProjects(res.data);
+      })
+      .catch(err => {
+        console.error("Failed to fetch projects", err);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
     if (loading) {
         return <div className="p-8">Loading projects...</div>;
@@ -53,10 +55,12 @@ export default function Projects() {
                     <h1 className="text-4xl font-bold font-heading">Projects</h1>
                     <p className="text-muted-foreground">Collaborate and track your team's projects.</p>
                 </div>
-                <Button>
-                    <Icons.chat className="w-4 h-4 mr-2" />
-                    New Project
-                </Button>
+                {isAdmin && (
+                  <Button>
+                      <Icons.chat className="w-4 h-4 mr-2" />
+                      New Project
+                  </Button>
+                )}
             </header>
 
             <motion.div 

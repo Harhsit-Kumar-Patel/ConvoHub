@@ -29,6 +29,7 @@ export default function Assignments() {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const user = getUser();
+    const isAdmin = user?.role === 'admin';
 
     useEffect(() => {
         api.get('/assignments')
@@ -36,16 +37,14 @@ export default function Assignments() {
                 setAssignments(res.data);
             })
             .catch(err => {
-                console.error("Failed to fetch assignments", err);
+                console.error('Failed to fetch assignments', err);
             })
-            .finally(() => {
-                setLoading(false);
-            });
+            .finally(() => setLoading(false));
     }, []);
 
     const isSubmitted = (assignment) => {
-        if (!user || !assignment.submissions) return false;
-        return assignment.submissions.some(sub => sub.student === user._id);
+        if (!user || !assignment?.submissions) return false;
+        return assignment.submissions.some((sub) => String(sub.student) === String(user._id));
     };
 
     if (loading) {
@@ -59,10 +58,12 @@ export default function Assignments() {
                     <h1 className="text-4xl font-bold font-heading">Assignments</h1>
                     <p className="text-muted-foreground">View and manage your course assignments.</p>
                 </div>
-                <Button>
-                    <Icons.notice className="w-4 h-4 mr-2" />
-                    New Assignment
-                </Button>
+                {isAdmin && (
+                  <Button>
+                      <Icons.notice className="w-4 h-4 mr-2" />
+                      New Assignment
+                  </Button>
+                )}
             </header>
 
             <motion.div 

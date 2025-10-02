@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Assignment from '../models/Assignment.js';
 import { auth } from '../middleware/auth.js';
+import { admin } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -11,6 +12,22 @@ router.get('/', auth(true), async (req, res) => {
     res.json(items);
   } catch (e) {
     res.status(500).json({ message: 'Failed to load assignments' });
+  }
+});
+
+// POST /api/assignments - Create a new assignment (admin only)
+router.post('/', auth(true), admin(), async (req, res) => {
+  try {
+    const { title, description, dueDate } = req.body || {};
+    if (!title || !dueDate) return res.status(400).json({ message: 'title and dueDate are required' });
+    const doc = await Assignment.create({
+      title: String(title).trim(),
+      description: description || '',
+      dueDate: new Date(dueDate),
+    });
+    return res.status(201).json(doc);
+  } catch (e) {
+    return res.status(500).json({ message: 'Failed to create assignment' });
   }
 });
 

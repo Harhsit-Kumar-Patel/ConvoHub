@@ -22,3 +22,14 @@ export function auth(required = true) {
     }
   };
 }
+
+// Admin-only guard: requires a valid auth() earlier in the chain
+export function admin() {
+  return (req, res, next) => {
+    // req.user is set by auth()
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: Admins only' });
+    }
+    return next();
+  };
+}

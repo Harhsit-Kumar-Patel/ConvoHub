@@ -9,7 +9,7 @@ const router = Router();
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, workspaceType } = req.body;
+    const { name, email, password, workspaceType, role } = req.body;
     if (!name || !email || !password || !workspaceType) {
         return res.status(400).json({ message: 'Missing fields' });
     }
@@ -20,7 +20,13 @@ router.post('/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, passwordHash, role: 'student', workspaceType });
+    // Determine role: allow explicit 'admin' when requested, otherwise default based on workspaceType
+    let roleToUse = 'student';
+    if (String(workspaceType) === 'professional') roleToUse = 'professional';
+    if (role && (role === 'admin' || role === 'student' || role === 'professional')) {
+      roleToUse = role;
+    }
+    const user = await User.create({ name, email, passwordHash, role: roleToUse, workspaceType });
 
     const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
     res.json({

@@ -24,6 +24,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [workspaceType, setWorkspaceType] = useState('educational');
+  const [roleChoice, setRoleChoice] = useState('user'); // 'user' | 'admin'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -34,7 +35,15 @@ export default function Auth() {
     setError('');
     try {
       const url = mode === 'login' ? `${API}/auth/login` : `${API}/auth/register`;
-      const payload = mode === 'login' ? { email, password } : { name, email, password, workspaceType };
+      const payload = mode === 'login'
+        ? { email, password }
+        : {
+            name,
+            email,
+            password,
+            workspaceType,
+            ...(roleChoice === 'admin' ? { role: 'admin' } : {}),
+          };
       const res = await axios.post(url, payload);
       const { token, user } = res.data || {};
       if (token) {
@@ -84,30 +93,42 @@ export default function Auth() {
         
         <motion.div
             variants={FADE_UP_ANIMATION_VARIANTS}
-            className="mt-8 text-left"
             animate={error ? { x: [-5, 5, -5, 5, 0], transition: { duration: 0.3 } } : {}}
         >
             <form onSubmit={submit} className="space-y-4">
               <AnimatePresence mode="popLayout">
                 {mode === 'register' && (
-                    <motion.div key="name-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5 }}>
-                        <InputField icon={<Icons.profile className="h-4 w-4 text-gray-400" />} type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} required />
-                    </motion.div>
+                  <motion.div key="name-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5 }}>
+                    <InputField icon={<Icons.profile className="h-4 w-4 text-gray-400" />} type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} required />
+                  </motion.div>
                 )}
               </AnimatePresence>
 
               <InputField icon={<svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>} type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
               <InputField icon={<svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>} type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              
+
               <AnimatePresence>
                 {mode === 'register' && (
-                  <motion.div key="workspace-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5, delay: 0.1 }} className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">I'm using ConvoHub for...</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button type="button" variant={workspaceType === 'educational' ? 'default' : 'outline'} onClick={() => setWorkspaceType('educational')}>Education</Button>
-                      <Button type="button" variant={workspaceType === 'professional' ? 'default' : 'outline'} onClick={() => setWorkspaceType('professional')}>Work</Button>
-                    </div>
-                  </motion.div>
+                  <>
+                    <motion.div key="workspace-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5, delay: 0.1 }} className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">I'm using ConvoHub for...</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button type="button" variant={workspaceType === 'educational' ? 'default' : 'outline'} onClick={() => setWorkspaceType('educational')}>Education</Button>
+                        <Button type="button" variant={workspaceType === 'professional' ? 'default' : 'outline'} onClick={() => setWorkspaceType('professional')}>Work</Button>
+                      </div>
+                    </motion.div>
+
+                    <motion.div key="role-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5, delay: 0.15 }} className="space-y-2">
+                      <label className="text-sm font-medium text-muted-foreground">Sign up as</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button type="button" variant={roleChoice === 'user' ? 'default' : 'outline'} onClick={() => setRoleChoice('user')}>User</Button>
+                        <Button type="button" variant={roleChoice === 'admin' ? 'default' : 'outline'} onClick={() => setRoleChoice('admin')}>Admin</Button>
+                      </div>
+                      {roleChoice === 'admin' && (
+                        <p className="text-xs text-amber-600">Note: Admins can create and manage projects and assignments.</p>
+                      )}
+                    </motion.div>
+                  </>
                 )}
               </AnimatePresence>
 

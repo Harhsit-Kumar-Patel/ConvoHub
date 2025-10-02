@@ -11,8 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 export default function TeamChat() {
   const [teams, setTeams] = useState([]);
   const [teamId, setTeamId] = useState('');
+  const [myTeams, setMyTeams] = useState([]); // teams I'm a member of
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [joining, setJoining] = useState(false);
   const me = getUser();
   const socket = useMemo(() => getSocket(), []);
   const messagesEndRef = useRef(null);
@@ -24,18 +26,22 @@ export default function TeamChat() {
 
   const fetchTeams = async () => {
     try {
-      // Load teams the user is a member of
-      let res = await api.get('/teams');
-      let list = res.data || [];
-      // Fallback to all teams so dropdown has options for first-time users
-      if (!list.length) {
-        res = await api.get('/teams/all');
-        list = res.data || [];
+      // Load teams the user is a member of, and all teams for discovery
+      const [mineRes, allRes] = await Promise.all([
+        api.get('/teams'),
+        api.get('/teams/all'),
+      ]);
+      const mine = mineRes.data || [];
+      const all = allRes.data || [];
+      setMyTeams(mine);
+      setTeams(all.length ? all : mine);
+      if (!teamId) {
+        const initial = (mine[0]?._id) || (all[0]?._id) || '';
+        if (initial) setTeamId(initial);
       }
-      setTeams(list);
-      if (!teamId && list.length) setTeamId(list[0]._id);
     } catch (e) {
       console.error('Failed to load teams', e);
+      setMyTeams([]);
       setTeams([]);
     }
   };
@@ -63,6 +69,29 @@ export default function TeamChat() {
       socket.off('teamMessage', onTeamMessage);
     };
   }, [teamId, socket]);
+
+  // Is the current user a member of the selected team?
+  const isMember = useMemo(() => myTeams.some((t) => t._id === teamId), [myTeams, teamId]);
+
+  async function joinSelectedTeam() {
+    if (!teamId || isMember) return;
+    setJoining(true);
+    try {
+      const res = await api.post(`/teams/${teamId}/join`);
+      const updated = res.data?.team;
+      // Refresh membership list; simple approach: append if not present
+      if (updated && !myTeams.some((t) => t._id === updated._id)) {
+        setMyTeams((prev) => [...prev, updated]);
+      } else {
+        // fallback to refetch to ensure consistency
+        fetchTeams();
+      }
+    } catch (e) {
+      console.error('Failed to join team', e);
+    } finally {
+      setJoining(false);
+    }
+  }
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -105,6 +134,16 @@ export default function TeamChat() {
               <option key={t._id} value={t._id}>{t.name}</option>
             ))}
           </select>
+
+          {/* Info banner and Join button when viewing a team you're not a member of */}
+          {teamId && !isMember && (
+            <div className="ml-2 px-3 py-2 rounded-md bg-amber-100 text-amber-900 text-xs flex items-center gap-2 border border-amber-200">
+              <span>You are viewing a team you haven't joined yet.</span>
+              <Button size="sm" variant="outline" onClick={joinSelectedTeam} disabled={joining}>
+                {joining ? 'Joining...' : 'Join team'}
+              </Button>
+            </div>
+          )}
 
           {/* Create Team Dialog Trigger */}
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
