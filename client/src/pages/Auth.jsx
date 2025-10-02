@@ -3,13 +3,20 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { getSocket } from '../lib/socket.js';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Icons } from '../components/Icons.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const TABS = ['login', 'register'];
+const InputField = ({ icon, ...props }) => (
+    <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            {icon}
+        </div>
+        <input {...props} className="block w-full pl-10 px-3 py-2 bg-background/50 border rounded-md focus:ring-2 focus:ring-primary focus:outline-none" />
+    </div>
+);
+
 
 export default function Auth() {
   const [mode, setMode] = useState('login');
@@ -45,107 +52,77 @@ export default function Auth() {
     }
   }
 
-  const inputVariants = {
+  const FADE_UP_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-    exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+    show: { opacity: 1, y: 0, transition: { type: "spring" } },
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4 relative overflow-hidden">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-primary/10 via-background to-secondary/10 p-4 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-72 h-72 bg-primary/20 rounded-full filter blur-3xl opacity-50 animate-blob" />
+      <div className="absolute bottom-0 right-0 w-72 h-72 bg-secondary/20 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-2000" />
+      
       <motion.div
-        className="absolute top-0 left-0 w-72 h-72 bg-primary/20 rounded-full filter blur-3xl opacity-50 animate-blob"
-      />
-      <motion.div
-        className="absolute top-0 right-0 w-72 h-72 bg-secondary/20 rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-2000"
-      />
-      <motion.div
-        className="absolute bottom-0 left-1/4 w-72 h-72 bg-accent rounded-full filter blur-3xl opacity-50 animate-blob animation-delay-4000"
-      />
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="w-full max-w-md z-10"
+        className="w-full max-w-md z-10 text-center"
+        initial="hidden"
+        animate="show"
+        viewport={{ once: true }}
+        variants={{ hidden: {}, show: { transition: { staggerChildren: 0.15 } } }}
       >
-        <Card className="bg-card/60 backdrop-blur-lg border-white/20 shadow-xl">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 mb-4 rounded-2xl bg-primary flex items-center justify-center">
-              <Icons.chat className="w-8 h-8 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-3xl font-heading bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">
-              {mode === 'login' ? 'Welcome Back!' : 'Join ConvoHub'}
-            </CardTitle>
-            <CardDescription>
-              {mode === 'login' ? "Log in to continue your collaboration." : "Create an account to get started."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="p-1 mb-6 bg-muted rounded-full flex">
-              {TABS.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setMode(tab)}
-                  className="relative w-1/2 py-2 text-sm font-medium text-muted-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-full"
-                >
-                  {mode === tab && (
-                    <motion.div
-                      layoutId="auth-mode-highlight"
-                      className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-full shadow"
-                      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                  <span className={`relative capitalize ${mode === tab ? 'text-primary-foreground' : 'text-muted-foreground'}`}>
-                    {tab}
-                  </span>
-                </button>
-              ))}
-            </div>
+        <motion.div variants={FADE_UP_ANIMATION_VARIANTS} className="flex justify-center items-center gap-2 mb-4">
+            <Icons.chat className="w-8 h-8 text-primary"/>
+            <span className="font-heading text-2xl font-bold">ConvoHub</span>
+        </motion.div>
 
+        <motion.h1 variants={FADE_UP_ANIMATION_VARIANTS} className="font-heading text-4xl font-bold tracking-tight">
+          {mode === 'login' ? 'Welcome Back' : 'Get Started'}
+        </motion.h1>
+
+        <motion.p variants={FADE_UP_ANIMATION_VARIANTS} className="text-muted-foreground mt-2">
+            {mode === 'login' ? "Sign in to access your dashboard." : "Create an account to start collaborating."}
+        </motion.p>
+        
+        <motion.div
+            variants={FADE_UP_ANIMATION_VARIANTS}
+            className="mt-8 text-left"
+            animate={error ? { x: [-5, 5, -5, 5, 0], transition: { duration: 0.3 } } : {}}
+        >
             <form onSubmit={submit} className="space-y-4">
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                 {mode === 'register' && (
-                  <motion.div key="register-fields" variants={inputVariants} initial="hidden" animate="visible" exit="exit" className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Name</label>
-                      <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background/50 border rounded-md focus:ring-2 focus:ring-primary" required />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">I'm using ConvoHub for...</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button type="button" variant={workspaceType === 'educational' ? 'default' : 'outline'} onClick={() => setWorkspaceType('educational')}>
-                          Education
-                        </Button>
-                        <Button type="button" variant={workspaceType === 'professional' ? 'default' : 'outline'} onClick={() => setWorkspaceType('professional')}>
-                          Work
-                        </Button>
-                      </div>
+                    <motion.div key="name-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5 }}>
+                        <InputField icon={<Icons.profile className="h-4 w-4 text-gray-400" />} type="text" placeholder="Your Name" value={name} onChange={(e) => setName(e.target.value)} required />
+                    </motion.div>
+                )}
+              </AnimatePresence>
+
+              <InputField icon={<svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>} type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <InputField icon={<svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>} type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              
+              <AnimatePresence>
+                {mode === 'register' && (
+                  <motion.div key="workspace-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5, delay: 0.1 }} className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">I'm using ConvoHub for...</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button type="button" variant={workspaceType === 'educational' ? 'default' : 'outline'} onClick={() => setWorkspaceType('educational')}>Education</Button>
+                      <Button type="button" variant={workspaceType === 'professional' ? 'default' : 'outline'} onClick={() => setWorkspaceType('professional')}>Work</Button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Email</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background/50 border rounded-md focus:ring-2 focus:ring-primary" required />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-background/50 border rounded-md focus:ring-2 focus:ring-primary" required />
-              </div>
-
               {error && <p className="text-sm text-center text-destructive">{error}</p>}
-
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button type="submit" disabled={loading} className="w-full text-base py-3 h-auto">
-                  {loading ? 'Please wait...' : (mode === 'login' ? 'Login' : 'Create Account')}
-                </Button>
-              </motion.div>
+              <Button type="submit" disabled={loading} className="w-full text-base py-3 h-auto">{loading ? 'Please wait...' : (mode === 'login' ? 'Login' : 'Create Account')}</Button>
             </form>
-          </CardContent>
-        </Card>
+        </motion.div>
+
+        <motion.div variants={FADE_UP_ANIMATION_VARIANTS} className="mt-6 text-center text-sm text-muted-foreground">
+          {mode === 'login' ? (
+            <p>Don't have an account? <button type="button" onClick={() => setMode('register')} className="font-semibold text-primary hover:underline">Sign up</button></p>
+          ) : (
+            <p>Already have an account? <button type="button" onClick={() => setMode('login')} className="font-semibold text-primary hover:underline">Log in</button></p>
+          )}
+        </motion.div>
       </motion.div>
     </div>
   );
