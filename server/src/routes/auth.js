@@ -20,15 +20,21 @@ router.post('/register', async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    // Determine role: allow explicit 'admin' when requested, otherwise default based on workspaceType
-    let roleToUse = 'student';
-    if (String(workspaceType) === 'professional') roleToUse = 'professional';
-    if (role && (role === 'admin' || role === 'student' || role === 'professional')) {
+    // Hierarchical defaults by workspace
+    const defaultRole = String(workspaceType) === 'professional' ? 'member' : 'student';
+    // Validate requested role against allowed enums
+    const allowedRoles = [
+      'student', 'ta', 'instructor', 'dept_admin',
+      'member', 'lead', 'manager', 'org_admin',
+      'admin'
+    ];
+    let roleToUse = defaultRole;
+    if (role && allowedRoles.includes(role)) {
       roleToUse = role;
     }
     const user = await User.create({ name, email, passwordHash, role: roleToUse, workspaceType });
 
-    const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role, name: user.name, workspaceType: user.workspaceType }, JWT_SECRET, { expiresIn: '7d' });
     res.json({
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role, workspaceType: user.workspaceType },
@@ -51,7 +57,7 @@ router.post('/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id, role: user.role, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id, role: user.role, name: user.name, workspaceType: user.workspaceType }, JWT_SECRET, { expiresIn: '7d' });
     res.json({
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role, workspaceType: user.workspaceType },

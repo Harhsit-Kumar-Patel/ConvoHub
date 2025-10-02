@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import Project from '../models/Project.js';
-import { auth } from '../middleware/auth.js';
-import { admin } from '../middleware/auth.js';
+import { auth, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -16,8 +15,8 @@ router.get('/', auth(true), async (req, res) => {
   }
 });
 
-// POST /api/projects - Create a new project (admin only)
-router.post('/', auth(true), admin(), async (req, res) => {
+// POST /api/projects - Create a new project (professional: lead+)
+router.post('/', auth(true), authorize({ min: 'lead', workspaceOnly: 'professional' }), async (req, res) => {
   try {
     const { name, description } = req.body || {};
     if (!name || !name.trim()) return res.status(400).json({ message: 'Name is required' });
@@ -28,8 +27,8 @@ router.post('/', auth(true), admin(), async (req, res) => {
   }
 });
 
-// POST /api/projects/:projectId/tasks - create new task (admin only)
-router.post('/:projectId/tasks', auth(true), admin(), async (req, res) => {
+// POST /api/projects/:projectId/tasks - create new task (professional: lead+)
+router.post('/:projectId/tasks', auth(true), authorize({ min: 'lead', workspaceOnly: 'professional' }), async (req, res) => {
   try {
     const { projectId } = req.params;
     const { title, description, status } = req.body || {};
@@ -46,8 +45,8 @@ router.post('/:projectId/tasks', auth(true), admin(), async (req, res) => {
   }
 });
 
-// PATCH /api/projects/:projectId/tasks/:taskId - update task (status/description/title) (admin only)
-router.patch('/:projectId/tasks/:taskId', auth(true), admin(), async (req, res) => {
+// PATCH /api/projects/:projectId/tasks/:taskId - update task (professional: lead+)
+router.patch('/:projectId/tasks/:taskId', auth(true), authorize({ min: 'lead', workspaceOnly: 'professional' }), async (req, res) => {
   try {
     const { projectId, taskId } = req.params;
     const { title, description, status } = req.body || {};

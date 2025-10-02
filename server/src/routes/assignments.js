@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import Assignment from '../models/Assignment.js';
-import { auth } from '../middleware/auth.js';
-import { admin } from '../middleware/auth.js';
+import { auth, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -15,8 +14,8 @@ router.get('/', auth(true), async (req, res) => {
   }
 });
 
-// POST /api/assignments - Create a new assignment (admin only)
-router.post('/', auth(true), admin(), async (req, res) => {
+// POST /api/assignments - Create a new assignment (educational: instructor+)
+router.post('/', auth(true), authorize({ min: 'instructor', workspaceOnly: 'educational' }), async (req, res) => {
   try {
     const { title, description, dueDate } = req.body || {};
     if (!title || !dueDate) return res.status(400).json({ message: 'title and dueDate are required' });
@@ -45,15 +44,15 @@ router.get('/:id', auth(true), async (req, res) => {
   }
 });
 
-// Submission endpoints
-// POST /api/assignments/:id/submissions - create or replace current user's submission (no files for now)
-router.post('/:id/submissions', auth(), async (req, res) => {
-  try {
-    const id = req.params.id;
-    const userId = req.user._id;
-    const { comment } = req.body || {};
-    const doc = await Assignment.findById(id);
-    if (!doc) return res.status(404).json({ message: 'Assignment not found' });
+  // Submission endpoints
+  // POST /api/assignments/:id/submissions - create or replace current user's submission (no files for now)
+  router.post('/:id/submissions', auth(), async (req, res) => {
+    try {
+      const id = req.params.id;
+      const userId = req.user.id;
+      const { comment } = req.body || {};
+      const doc = await Assignment.findById(id);
+      if (!doc) return res.status(404).json({ message: 'Assignment not found' });
 
     // Remove existing submission by user if exists, then push new one
     doc.submissions = (doc.submissions || []).filter((s) => String(s.student) !== String(userId));
@@ -65,18 +64,18 @@ router.post('/:id/submissions', auth(), async (req, res) => {
   }
 });
 
-// GET /api/assignments/:id/submissions/me - get current user's submission
-router.get('/:id/submissions/me', auth(), async (req, res) => {
-  try {
-    const id = req.params.id;
-    const userId = req.user._id;
-    const doc = await Assignment.findById(id).lean();
-    if (!doc) return res.status(404).json({ message: 'Assignment not found' });
-    const mine = (doc.submissions || []).find((s) => String(s.student) === String(userId));
-    return res.json(mine || null);
-  } catch (e) {
-    return res.status(500).json({ message: 'Failed to load submission' });
-  }
-});
+  // GET /api/assignments/:id/submissions/me - get current user's submission
+  router.get('/:id/submissions/me', auth(), async (req, res) => {
+    try {
+      const id = req.params.id;
+      const userId = req.user.id;
+      const doc = await Assignment.findById(id).lean();
+      if (!doc) return res.status(404).json({ message: 'Assignment not found' });
+      const mine = (doc.submissions || []).find((s) => String(s.student) === String(userId));
+      return res.json(mine || null);
+    } catch (e) {
+      return res.status(500).json({ message: 'Failed to load submission' });
+    }
+  });
 
 export default router;
