@@ -7,8 +7,22 @@ import api from '../lib/api.js';
 import { Icons } from '../components/Icons.jsx';
 import { getUser } from '../lib/auth.js';
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.07 }
+    }
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring' } }
+};
+
+
 const StatCard = ({ title, value, icon: Icon, colorClass }) => (
-    <motion.div whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300 }}>
+    <motion.div variants={itemVariants} whileHover={{ y: -4 }} transition={{ type: 'spring', stiffness: 300 }}>
         <Card className="overflow-hidden shadow-sm transition-shadow hover:shadow-md">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
@@ -69,21 +83,13 @@ export default function Dashboard() {
         fetchData();
     }, []);
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.07 }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: { y: 0, opacity: 1, transition: { type: 'spring' } }
-    };
-
     return (
-        <div className="p-6 md:p-8 space-y-8">
+        <motion.div 
+            className="p-6 md:p-8 space-y-8"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             {/* Welcome Banner */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -96,22 +102,22 @@ export default function Dashboard() {
             </motion.div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
                  <Button asChild variant="outline" className="h-auto py-3"><Link to="/direct">New Message</Link></Button>
                  <Button asChild variant="outline" className="h-auto py-3"><Link to="/projects">View Projects</Link></Button>
                  <Button asChild variant="outline" className="h-auto py-3"><Link to="/assignments">Assignments</Link></Button>
                  <Button asChild variant="outline" className="h-auto py-3"><Link to="/complaints">Submit Feedback</Link></Button>
-            </div>
+            </motion.div>
 
             {/* Stat Cards */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <motion.div variants={containerVariants} className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <StatCard title="Active Notices" value={`${stats.notices}`} icon={Icons.notice} colorClass="bg-blue-500" />
                 <StatCard title="Recent DMs" value={`${stats.threads}`} icon={Icons.dm} colorClass="bg-purple-500" />
                 <StatCard title="Your Cohort" value="Alpha 2025" icon={Icons.chat} colorClass="bg-green-500" />
-            </div>
+            </motion.div>
 
             {/* Activity Feed */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+            <motion.div variants={itemVariants}>
                 <Card>
                     <CardHeader>
                         <CardTitle>Recent Activity</CardTitle>
@@ -141,6 +147,6 @@ export default function Dashboard() {
                     </CardContent>
                 </Card>
             </motion.div>
-        </div>
+        </motion.div>
     );
 }

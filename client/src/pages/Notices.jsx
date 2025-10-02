@@ -33,6 +33,24 @@ export default function Notices() {
     return arr;
   }, [items, tab, query]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+    },
+  };
+
   return (
     <section className="p-6">
       <div className="mb-5 space-y-3">
@@ -57,7 +75,12 @@ export default function Notices() {
           </div>
         </div>
       </div>
-      <div className="grid gap-4">
+      <motion.div
+        className="grid gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {loading && (
           Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -71,13 +94,11 @@ export default function Notices() {
             </div>
           ))
         )}
-        {filtered.map((n, i) => (
+        {filtered.map((n) => (
           <motion.div
             key={n._id}
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.03 * i }}
+            variants={itemVariants}
+            whileHover={{ scale: 1.02 }}
             className="rounded-2xl border border-white/60 dark:border-white/10 bg-white/70 dark:bg-slate-900/60 backdrop-blur p-4 shadow cursor-pointer hover:border-primary/40"
             onClick={()=>{ setSelected(n); setOpen(true); }}
           >
@@ -100,7 +121,7 @@ export default function Notices() {
             </div>
           )
         )}
-      </div>
+      </motion.div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

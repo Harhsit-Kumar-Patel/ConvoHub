@@ -5,6 +5,25 @@ import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Icons } from '../components/Icons';
 import { getUser } from '@/lib/auth';
+import { motion } from 'framer-motion';
+
+const containerVariants = {
+    hidden: { opacity: 1 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+    },
+};
 
 export default function Assignments() {
     const [assignments, setAssignments] = useState([]);
@@ -46,39 +65,50 @@ export default function Assignments() {
                 </Button>
             </header>
 
-            <div className="space-y-4">
+            <motion.div 
+                className="space-y-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
                 {assignments.map((assignment) => (
-                    <Card key={assignment._id} className="transition-all hover:shadow-md">
-                        <CardContent className="p-4 flex flex-col md:flex-row items-start md:items-center gap-4">
-                            <div className="flex-1">
-                                <h3 className="font-semibold text-lg">{assignment.title}</h3>
-                                <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{assignment.description}</p>
-                            </div>
-                            <div className="w-full md:w-auto flex items-center justify-between gap-4">
-                                <div className="text-sm text-muted-foreground text-left md:text-center w-32">
-                                    <span className="font-medium text-foreground">Due:</span> {new Date(assignment.dueDate).toLocaleDateString()}
+                    <motion.div
+                        key={assignment._id}
+                        variants={itemVariants}
+                        whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                    >
+                        <Card className="transition-all hover:shadow-md">
+                            <CardContent className="p-4 flex flex-col md:flex-row items-start md:items-center gap-4">
+                                <div className="flex-1">
+                                    <h3 className="font-semibold text-lg">{assignment.title}</h3>
+                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{assignment.description}</p>
                                 </div>
-                                <div className="w-28 text-center">
-                                    {isSubmitted(assignment) ? (
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
-                                            Submitted
-                                        </span>
-                                    ) : (
-                                        <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">
-                                            Pending
-                                        </span>
-                                    )}
+                                <div className="w-full md:w-auto flex items-center justify-between gap-4">
+                                    <div className="text-sm text-muted-foreground text-left md:text-center w-32">
+                                        <span className="font-medium text-foreground">Due:</span> {new Date(assignment.dueDate).toLocaleDateString()}
+                                    </div>
+                                    <div className="w-28 text-center">
+                                        {isSubmitted(assignment) ? (
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300">
+                                                Submitted
+                                            </span>
+                                        ) : (
+                                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">
+                                                Pending
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="w-28 text-right">
+                                        <Button asChild variant="outline" size="sm">
+                                            <Link to={`/assignments/${assignment._id}`}>View Details</Link>
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="w-28 text-right">
-                                    <Button asChild variant="outline" size="sm">
-                                        <Link to={`/assignments/${assignment._id}`}>View Details</Link>
-                                    </Button>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
         </div>
     );
 }
