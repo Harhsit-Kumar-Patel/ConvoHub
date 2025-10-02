@@ -7,7 +7,10 @@ import Message from '../src/models/Message.js';
 import Complaint from '../src/models/Complaint.js';
 import Assignment from '../src/models/Assignment.js'; // Import new model
 import Project from '../src/models/Project.js';     // Import new model
-import { users, cohorts, notices, assignments, projects } from './data.js'; // Import new data
+import Team from '../src/models/Team.js';
+import Course from '../src/models/Course.js';
+import Grade from '../src/models/Grade.js';
+import { educationalUsers, professionalUsers, cohorts, notices, assignments, projects, courses, teams } from './data.js';
 
 async function run() {
   await connectDB();
@@ -18,21 +21,62 @@ async function run() {
     Cohort.deleteMany({}),
     Message.deleteMany({}),
     Complaint.deleteMany({}),
-    Assignment.deleteMany({}), // Clear old assignments
-    Project.deleteMany({}),    // Clear old projects
+    Assignment.deleteMany({}),
+    Project.deleteMany({}),
+    Team.deleteMany({}),
+    Course.deleteMany({}),
+    Grade.deleteMany({}),
   ]);
 
   console.log('Seeding data...');
-  const [userDocs, cohortDocs] = await Promise.all([
-    User.insertMany(users),
-    Cohort.insertMany(cohorts),
+  // Users
+  const [eduUsers, proUsers] = await Promise.all([
+    User.insertMany(educationalUsers),
+    User.insertMany(professionalUsers),
   ]);
+
+  // Cohorts and notices (educational)
+  const cohortDocs = await Cohort.insertMany(cohorts);
   await Notice.insertMany(notices);
-  await Assignment.insertMany(assignments); // Seed assignments
-  await Project.insertMany(projects);       // Seed projects
+
+  // Courses and Assignments
+  const courseDocs = await Course.insertMany(courses);
+  await Assignment.insertMany(assignments);
+
+  // Teams and Projects (professional)
+  const teamDocs = await Team.insertMany(teams);
+  await Project.insertMany(projects);
+
+  // Enroll all educational users into all courses for demo richness
+  if (courseDocs.length && eduUsers.length) {
+    const courseIds = courseDocs.map((c) => c._id);
+    // Update each course with all student IDs (capped to 20 to avoid huge docs)
+    const studentIds = eduUsers.slice(0, 20).map((u) => u._id);
+    await Promise.all(
+      courseDocs.map((c) => Course.updateOne({ _id: c._id }, { $addToSet: { students: { $each: studentIds } } }))
+    );
+  }
+
+  // Create sample grades for first few users across assignments and first course
+  const allAssignments = await Assignment.find({}).lean();
+  const firstCourse = courseDocs[0];
+  const gradeScale = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C'];
+  if (allAssignments.length && firstCourse && eduUsers.length) {
+    const toGradeUsers = eduUsers.slice(0, Math.min(10, eduUsers.length));
+    const gradeDocs = [];
+    for (const u of toGradeUsers) {
+      for (const a of allAssignments) {
+        const score = gradeScale[Math.floor(Math.random() * gradeScale.length)];
+        gradeDocs.push({ student: u._id, assignment: a._id, course: firstCourse._id, score, feedback: 'Well done.' });
+      }
+    }
+    if (gradeDocs.length) await Grade.insertMany(gradeDocs);
+  }
 
   // Sample messages
-  await Message.create({ from: userDocs[1]._id, toCohort: cohortDocs[0]._id, body: 'Hello Alpha cohort!' });
+  if (eduUsers.length && cohortDocs.length) {
+    await Message.create({ from: eduUsers[0]._id, toCohort: cohortDocs[0]._id, body: 'Hello CS 2025 cohort!' });
+  }
 
   console.log('Seed completed successfully!');
   await mongoose.connection.close();

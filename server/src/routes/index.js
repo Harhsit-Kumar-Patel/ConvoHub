@@ -7,7 +7,9 @@ import messagesRouter from './messages.js';
 import usersRouter from './users.js';
 import assignmentsRouter from './assignments.js';
 import projectsRouter from './projects.js';
-import teamsRouter from './teams.js'; // Add this line
+import teamsRouter from './teams.js';
+import coursesRouter from './courses.js';
+import gradesRouter from './grades.js';
 
 const router = Router();
 
@@ -21,6 +23,8 @@ router.use('/messages', messagesRouter);
 router.use('/users', usersRouter);
 router.use('/assignments', assignmentsRouter);
 router.use('/projects', projectsRouter);
-router.use('/teams', teamsRouter); // Add this line
+router.use('/teams', teamsRouter);
+router.use('/courses', coursesRouter);
+router.use('/grades', gradesRouter);
 
 export default router;

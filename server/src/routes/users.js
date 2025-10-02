@@ -10,7 +10,7 @@ router.get('/search', auth(true), async (req, res) => {
   if (!q) return res.json([]);
   const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
   const items = await User.find({ $or: [{ name: re }, { email: re }] })
-    .select('name email')
+    .select('name email role skills')
     .limit(20)
     .lean();
   res.json(items);
