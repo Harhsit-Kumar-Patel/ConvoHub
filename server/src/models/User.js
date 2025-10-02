@@ -4,15 +4,12 @@ const UserSchema = new mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String, required: true },
-    // Hierarchical roles across workspaces. Back-compat: include 'admin'.
-    // Educational: student < ta < instructor < dept_admin
-    // Professional: member < lead < manager < org_admin
     role: {
       type: String,
       enum: [
-        'student', 'ta', 'instructor', 'dept_admin',
+        'student', 'ta', 'instructor', 'coordinator', 'principal',
         'member', 'lead', 'manager', 'org_admin',
-        'admin' // legacy superuser
+        'admin'
       ],
       default: 'student'
     },

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { getUser, isAuthed, logout } from '../lib/auth.js';
+import { getUser, isAuthed, logout, hasRoleAtLeast } from '../lib/auth.js';
 import { Button } from './ui/button.jsx';
 import { Icons } from './Icons.jsx';
 
@@ -12,6 +12,7 @@ const educationalLinks = [
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
+  { to: '/school-admin', label: 'Admin Panel', icon: Icons.dashboard, minRole: 'principal' },
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
@@ -57,7 +58,9 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { 
         </div>
         <nav className="mt-8 space-y-1">
           {navLinks.map(link => {
-            // Active when exact path matches or continues with a trailing slash (for nested routes)
+            if (link.minRole && !hasRoleAtLeast(link.minRole)) {
+              return null;
+            }
             const isActive = location.pathname === link.to || location.pathname.startsWith(`${link.to}/`);
             return (
               <Link

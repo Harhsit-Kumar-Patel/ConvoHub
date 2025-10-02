@@ -13,7 +13,7 @@ export function auth(required = true) {
     }
     try {
       const payload = jwt.verify(token, JWT_SECRET);
-      req.user = payload; // { id, role, name, workspaceType }
+      req.user = payload;
       return next();
     } catch (e) {
       if (required) return res.status(401).json({ message: 'Invalid token' });
@@ -23,32 +23,21 @@ export function auth(required = true) {
   };
 }
 
-// Admin-only guard: requires a valid auth() earlier in the chain
-export function admin() {
-  return (req, res, next) => {
-    // req.user is set by auth()
-    if (!req.user || req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Forbidden: Admins only' });
-    }
-    return next();
-  };
-}
-
-// Role rankings per workspace for hierarchical authorization
 const roleRanks = {
   educational: {
     student: 1,
     ta: 2,
     instructor: 3,
-    dept_admin: 4,
-    admin: 99, // legacy superuser
+    coordinator: 4,
+    principal: 5,
+    admin: 99,
   },
   professional: {
     member: 1,
     lead: 2,
     manager: 3,
     org_admin: 4,
-    admin: 99, // legacy superuser
+    admin: 99,
   },
 };
 
@@ -58,31 +47,17 @@ function getRank(workspaceType, role) {
   return table[role] || 0;
 }
 
-function normalizeRole(workspaceType, role) {
-  if (role === 'admin') return 'admin';
-  if (workspaceType === 'professional') {
-    // legacy 'professional' becomes base member
-    if (role === 'professional') return 'member';
-    return role;
-  }
-  // educational
-  return role; // 'student' already valid
-}
-
-// authorize({ min?: string, allowed?: string[] })
-// authorize({ min?: string, allowed?: string[], workspaceOnly?: 'educational'|'professional' })
 export function authorize(opts = {}) {
   const { min, allowed, workspaceOnly } = opts;
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
-    const { role: rawRole, workspaceType } = req.user;
-    const role = normalizeRole(workspaceType, rawRole);
+    const { role, workspaceType } = req.user;
 
     if (workspaceOnly && workspaceType !== workspaceOnly) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    if (role === 'admin') return next(); // superuser bypass
+    if (role === 'admin') return next();
 
     if (Array.isArray(allowed) && allowed.length > 0) {
       if (!allowed.includes(role)) {
@@ -99,8 +74,6 @@ export function authorize(opts = {}) {
       }
       return next();
     }
-
-    // If neither min nor allowed provided, default to authenticated only
     return next();
   };
 }
