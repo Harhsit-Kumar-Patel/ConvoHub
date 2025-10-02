@@ -54,7 +54,8 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { 
         </div>
         <nav className="mt-8 space-y-1">
           {navLinks.map(link => {
-            const isActive = location.pathname.startsWith(link.to);
+            // Active when exact path matches or continues with a trailing slash (for nested routes)
+            const isActive = location.pathname === link.to || location.pathname.startsWith(`${link.to}/`);
             return (
               <Link
                 key={link.to}

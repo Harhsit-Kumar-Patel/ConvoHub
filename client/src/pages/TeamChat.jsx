@@ -17,28 +17,40 @@ export default function TeamChat() {
   const socket = useMemo(() => getSocket(), []);
   const messagesEndRef = useRef(null);
 
-  // State for the create team dialog
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
   const [newTeamDesc, setNewTeamDesc] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const fetchTeams = () => {
-    api.get('/teams').then((res) => {
-      const list = res.data || [];
+  const fetchTeams = async () => {
+    try {
+      // Load teams the user is a member of
+      let res = await api.get('/teams');
+      let list = res.data || [];
+      // Fallback to all teams so dropdown has options for first-time users
+      if (!list.length) {
+        res = await api.get('/teams/all');
+        list = res.data || [];
+      }
       setTeams(list);
       if (!teamId && list.length) setTeamId(list[0]._id);
-    });
+    } catch (e) {
+      console.error('Failed to load teams', e);
+      setTeams([]);
+    }
   };
 
+  // Fetch teams on first render
   useEffect(() => {
     fetchTeams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // When team changes, join room, load messages, and subscribe to updates
   useEffect(() => {
     if (!teamId) return;
     socket.emit('joinTeam', teamId);
-    setMessages([]); // Clear messages when changing teams
+    setMessages([]);
     api.get('/messages', { params: { teamId } }).then((res) => setMessages(res.data || []));
 
     const onTeamMessage = (payload) => {
