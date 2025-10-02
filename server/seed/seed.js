@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 import { connectDB } from '../src/db.js';
 import User from '../src/models/User.js';
 import Notice from '../src/models/Notice.js';
@@ -30,9 +31,16 @@ async function run() {
 
   console.log('Seeding data...');
   // Users
+  // Use a single known demo password for all seeded users, configurable via env.
+  const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'password';
+  const hashed = await bcrypt.hash(DEMO_PASSWORD, 10);
+
+  const eduUsersData = educationalUsers.map((u) => ({ ...u, passwordHash: hashed }));
+  const proUsersData = professionalUsers.map((u) => ({ ...u, passwordHash: hashed }));
+
   const [eduUsers, proUsers] = await Promise.all([
-    User.insertMany(educationalUsers),
-    User.insertMany(professionalUsers),
+    User.insertMany(eduUsersData),
+    User.insertMany(proUsersData),
   ]);
 
   // Cohorts and notices (educational)
