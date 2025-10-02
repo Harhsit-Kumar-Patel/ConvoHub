@@ -3,23 +3,32 @@ import { getUser, isAuthed, logout } from '../lib/auth.js';
 import { Button } from './ui/button.jsx';
 import { Icons } from './Icons.jsx';
 
-const commonLinks = [
+const educationalLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
   { to: '/notices', label: 'Notices', icon: Icons.notice },
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
-  { to: '/projects', label: 'Projects', icon: Icons.chat },
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
+const professionalLinks = [
+  { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
+  { to: '/projects', label: 'Projects', icon: Icons.chat },
+  { to: '/teams', label: 'Team Chat', icon: Icons.chat }, // Add this line
+  { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
+  { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
+  { to: '/profile', label: 'Profile', icon: Icons.profile },
+];
+
+
 export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { } }) {
   const location = useLocation();
   const user = getUser();
   const authed = isAuthed();
 
-  const navLinks = commonLinks;
+  const navLinks = user?.workspaceType === 'professional' ? professionalLinks : educationalLinks;
 
   const handleLogout = () => {
     logout();

@@ -16,6 +16,7 @@ import Assignments from './pages/Assignments.jsx';
 import AssignmentDetail from './pages/AssignmentDetail.jsx';
 import Projects from './pages/Projects.jsx';
 import ProjectBoard from './pages/ProjectBoard.jsx';
+import TeamChat from './pages/TeamChat.jsx'; // Add this line
 import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
 
 
@@ -45,15 +46,17 @@ export default function App() {
           <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/notices" element={<ProtectedRoute><Notices /></ProtectedRoute>} />
-          <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
           <Route path="/direct" element={<ProtectedRoute><Direct /></ProtectedRoute>} />
           <Route path="/complaints" element={<ProtectedRoute><Complaints /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
           {/* Educational Routes */}
+          <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
           <Route path="/assignments" element={<ProtectedRoute><Assignments /></ProtectedRoute>} />
           <Route path="/assignments/:id" element={<ProtectedRoute><AssignmentDetail /></ProtectedRoute>} />
 
+          {/* Professional Routes */}
+          <Route path="/teams" element={<ProtectedRoute><TeamChat /></ProtectedRoute>} /> {/* Add this line */}
           <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
           <Route path="/projects/:id" element={<ProtectedRoute><ProjectBoard /></ProtectedRoute>} />
         </Routes>

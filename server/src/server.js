@@ -33,25 +33,14 @@ io.of('/chat').on('connection', (socket) => {
     socket.join(`cohort:${cohortId}`);
   });
 
-  // Cohort message
-  socket.on('cohortMessage', ({ cohortId, message }) => {
-    io.of('/chat').to(`cohort:${cohortId}`).emit('cohortMessage', {
-      message,
-      cohortId,
-      at: new Date().toISOString(),
-    });
+  // Add this new event listener for teams
+  socket.on('joinTeam', (teamId) => {
+    socket.join(`team:${teamId}`);
   });
 
   // Direct message (p2p via rooms per user)
   socket.on('identify', (userId) => {
     socket.join(`user:${userId}`);
-  });
-
-  socket.on('directMessage', ({ toUserId, message }) => {
-    io.of('/chat').to(`user:${toUserId}`).emit('directMessage', {
-      message,
-      at: new Date().toISOString(),
-    });
   });
 });
 

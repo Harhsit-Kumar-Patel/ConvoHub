@@ -5,12 +5,13 @@ import { auth } from '../middleware/auth.js';
 
 const router = Router();
 
-// GET /api/messages?cohortId=... | toUser=...
+// GET /api/messages?cohortId=... | toUser=... | teamId=...
 router.get('/', auth(true), async (req, res) => {
   try {
-    const { cohortId, toUser, limit = 50 } = req.query;
+    const { cohortId, toUser, teamId, limit = 50 } = req.query; // Add teamId
     const q = {};
     if (cohortId) q.toCohort = new mongoose.Types.ObjectId(cohortId);
+    if (teamId) q.toTeam = new mongoose.Types.ObjectId(teamId); // Add this line
     if (toUser) q.$or = [
       { from: new mongoose.Types.ObjectId(String(req.user.id)), toUser: new mongoose.Types.ObjectId(String(toUser)) },
       { from: new mongoose.Types.ObjectId(String(toUser)), toUser: new mongoose.Types.ObjectId(String(req.user.id)) },
@@ -26,50 +27,53 @@ router.get('/', auth(true), async (req, res) => {
   }
 });
 
-// POST /api/messages  { body, cohortId? , toUser? }
+// POST /api/messages  { body, cohortId?, toUser?, teamId? }
 router.post('/', auth(true), async (req, res) => {
   try {
-    const { body, cohortId, toUser } = req.body || {};
-    if (!body || (!cohortId && !toUser)) return res.status(400).json({ message: 'Invalid payload' });
+    const { body, cohortId, toUser, teamId } = req.body || {}; // Add teamId
+    if (!body || (!cohortId && !toUser && !teamId)) return res.status(400).json({ message: 'Invalid payload' }); // Add teamId check
 
     const doc = await Message.create({
       from: req.user.id,
       toCohort: cohortId || undefined,
       toUser: toUser || undefined,
+      toTeam: teamId || undefined, // Add this line
       body: String(body),
     });
 
     // Emit via socket
     const io = req.app.get('io');
+    const populatedDoc = await doc.populate('from', 'name');
+
     if (cohortId) {
       io.of('/chat').to(`cohort:${cohortId}`).emit('cohortMessage', {
-        message: doc.body,
+        message: populatedDoc,
         cohortId,
-        at: doc.createdAt,
-        from: { _id: req.user.id },
+      });
+    }
+    if (teamId) { // Add this block
+      io.of('/chat').to(`team:${teamId}`).emit('teamMessage', {
+        message: populatedDoc,
+        teamId,
       });
     }
     if (toUser) {
       io.of('/chat').to(`user:${toUser}`).emit('directMessage', {
-        message: doc.body,
-        at: doc.createdAt,
-        from: { _id: req.user.id },
+        message: populatedDoc,
       });
       // echo to sender thread as well
       io.of('/chat').to(`user:${req.user.id}`).emit('directMessage', {
-        message: doc.body,
-        at: doc.createdAt,
-        from: { _id: req.user.id },
+        message: populatedDoc,
       });
     }
 
-    res.status(201).json(doc);
+    res.status(201).json(populatedDoc);
   } catch (e) {
     res.status(500).json({ message: 'Failed to send message' });
   }
 });
 
-export default router;
+
 // Recent DM threads for the authenticated user
 router.get('/recent-threads', auth(true), async (req, res) => {
   try {
@@ -117,3 +121,6 @@ router.get('/recent-threads', auth(true), async (req, res) => {
     res.status(500).json({ message: 'Failed to load recent threads' });
   }
 });
+
+
+export default router;
