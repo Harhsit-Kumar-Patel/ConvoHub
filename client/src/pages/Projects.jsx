@@ -23,7 +23,29 @@ export default function Projects() {
     }, []);
 
     if (loading) {
-        return <div className="p-8">Loading projects...</div>;
+        return (
+            <div className="p-8 space-y-8">
+                <header>
+                    <h1 className="text-4xl font-bold font-heading">Projects</h1>
+                    <p className="text-muted-foreground">Loading your team's projects...</p>
+                </header>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {[...Array(3)].map((_, i) => (
+                        <Card key={i}>
+                            <CardHeader>
+                                <div className="h-6 bg-muted rounded w-3/4 animate-pulse"></div>
+                                <div className="h-4 bg-muted rounded w-1/2 mt-2 animate-pulse"></div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="h-4 bg-muted rounded w-full mb-2 animate-pulse"></div>
+                                <div className="h-4 bg-muted rounded w-5/6 mb-4 animate-pulse"></div>
+                                <div className="h-9 bg-muted rounded w-28 animate-pulse"></div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -41,7 +63,7 @@ export default function Projects() {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {projects.map(project => (
-                    <Card key={project._id}>
+                    <Card key={project._id} className="hover:border-primary/50 transition-colors shadow-sm">
                         <CardHeader>
                             <CardTitle>{project.name}</CardTitle>
                             <CardDescription>
@@ -49,7 +71,7 @@ export default function Projects() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
+                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
                             <Button asChild variant="outline" size="sm">
                                 <Link to={`/projects/${project._id}`} state={{ project }}>View Board</Link>
                             </Button>

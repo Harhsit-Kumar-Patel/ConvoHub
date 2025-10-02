@@ -3,19 +3,18 @@ import { getUser, isAuthed, logout } from '../lib/auth.js';
 import { Button } from './ui/button.jsx';
 import { Icons } from './Icons.jsx';
 
-// Unified navigation so that all primary features are always visible
 const commonLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
   { to: '/notices', label: 'Notices', icon: Icons.notice },
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
-  { to: '/projects', label: 'Projects', icon: Icons.chat }, // Re-using icon for brevity
+  { to: '/projects', label: 'Projects', icon: Icons.chat },
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
-export default function Sidebar({ isMobileOpen = false, onMobileClose = () => {} }) {
+export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { } }) {
   const location = useLocation();
   const user = getUser();
   const authed = isAuthed();
@@ -28,7 +27,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => {}
   }
 
   if (!authed) {
-    return null; // Don't render sidebar on auth page
+    return null;
   }
 
   const SidebarBody = (
@@ -51,7 +50,7 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => {}
                 to={link.to}
                 onClick={onMobileClose}
                 className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                  ${isActive ? 'bg-secondary/10 text-secondary' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}
+                  ${isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}
               >
                 <link.icon className="w-5 h-5" />
                 <span>{link.label}</span>
@@ -74,12 +73,10 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => {}
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside className="hidden md:flex md:flex-col md:h-screen md:sticky md:top-0">
         {SidebarBody}
       </aside>
 
-      {/* Mobile drawer */}
       {isMobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/40" onClick={onMobileClose} />

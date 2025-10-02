@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,72 +6,71 @@
 
 @layer base {
   :root {
-    --background: 240 10% 99%; /* Lighter gray */
-    --foreground: 240 10% 3.9%;
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 224 71% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 224 71% 4%;
 
-    /* Primary color (Vibrant Teal) */
-    --primary: 175 60% 45%;
-    --primary-foreground: 0 0% 100%;
+    /* New Primary Color (Rich Blue) */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
 
-    /* Secondary color (Warm Coral) */
-    --secondary: 10 80% 60%;
-    --secondary-foreground: 0 0% 100%;
+    /* New Secondary Color (Warm Amber) */
+    --secondary: 45 93% 47%;
+    --secondary-foreground: 48 96% 9%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215 28% 44%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 224 71% 4%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 175 60% 45%;
+    --border: 215 20% 90%;
+    --input: 215 20% 85%;
+    --ring: 221 83% 53%;
 
     --radius: 0.75rem;
-    /* Accessibility */
     --font-scale: 1;
     --contrast-multiplier: 1;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 224 71% 8%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Primary color (Vibrant Teal) */
-    --primary: 175 60% 45%;
-    --primary-foreground: 0 0% 100%;
+    /* New Primary Color (Rich Blue) */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
 
-    /* Secondary color (Warm Coral) */
-    --secondary: 10 80% 60%;
-    --secondary-foreground: 0 0% 100%;
+    /* New Secondary Color (Warm Amber) */
+    --secondary: 45 93% 47%;
+    --secondary-foreground: 48 96% 9%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215 28% 66%;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 223 47% 11%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 250 53% 53%;
+    --border: 215 28% 17%;
+    --input: 215 28% 22%;
+    --ring: 221 83% 53%;
   }
 }
 
@@ -83,7 +82,6 @@
     @apply bg-background text-foreground;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
-  /* Scale base font size using CSS variable for accessibility */
   html { font-size: calc(16px * var(--font-scale)); }
 }
 
