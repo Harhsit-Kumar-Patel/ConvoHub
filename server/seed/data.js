@@ -41,9 +41,29 @@ export const cohorts = [
 ];
 
 export const courses = [
-  { name: 'Data Structures', code: 'CS201', instructor: 'Prof. S. Rao' },
-  { name: 'Algorithms', code: 'CS301', instructor: 'Dr. P. Kumar' },
-  { name: 'Operating Systems', code: 'CS210', instructor: 'Prof. R. Banerjee' },
+  {
+    name: 'Data Structures',
+    code: 'CS201',
+    instructor: 'Prof. S. Rao',
+    materials: [
+      { name: 'Syllabus.pdf', url: '#', fileType: 'PDF' },
+      { name: 'Lecture 1 - Intro.pptx', url: '#', fileType: 'Slides' },
+    ]
+  },
+  {
+    name: 'Algorithms',
+    code: 'CS301',
+    instructor: 'Dr. P. Kumar',
+    materials: [
+      { name: 'Course Outline.pdf', url: '#', fileType: 'PDF' },
+    ]
+  },
+  {
+    name: 'Operating Systems',
+    code: 'CS210',
+    instructor: 'Prof. R. Banerjee',
+    materials: []
+  },
 ];
 
 export const notices = [
@@ -56,11 +76,13 @@ export const assignments = [
     title: 'Data Structures: Lab 3',
     description: 'Implement a binary search tree with inorder traversal metrics.',
     dueDate: new Date('2025-10-15T23:59:59Z'),
+    courseCode: 'CS201', // Link to course
   },
   {
     title: 'Web Dev: Project Milestone 1',
     description: 'Submit wireframes, REST endpoints design and ER diagram (Indian e-gov service use case).',
     dueDate: new Date('2025-10-22T23:59:59Z'),
+    courseCode: 'CS301', // Link to course
   },
 ];
 
@@ -118,15 +140,10 @@ async function run() {
   await Cohort.insertMany(cohorts);
   await Notice.insertMany(notices);
   await Course.insertMany(courses);
-  await Assignment.insertMany(assignments);
+  // We'll handle assignments in the main seed script now
   await Team.insertMany(teams);
   await Project.insertMany(projects);
 
   console.log('Seed completed successfully!');
   await mongoose.connection.close();
 }
-
-run().catch((e) => {
-  console.error('Seed script failed:', e);
-  process.exit(1);
-});

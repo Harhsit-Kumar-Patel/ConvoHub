@@ -1,3 +1,4 @@
+// client/src/App.jsx
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -17,12 +18,15 @@ import Notices from './pages/Notices.jsx';
 // Educational pages
 import EduDashboard from './pages/educational/EduDashboard.jsx';
 import Courses from './pages/educational/Courses.jsx';
+import CourseDetail from './pages/educational/CourseDetail.jsx';
 import Grades from './pages/educational/Grades.jsx';
 import CohortChat from './pages/educational/CohortChat.jsx';
 import Assignments from './pages/educational/Assignments.jsx';
 import AssignmentDetail from './pages/educational/AssignmentDetail.jsx';
-import CreateAssignment from './pages/educational/CreateAssignment.jsx'; // Import new page
-import ViewComplaints from './pages/educational/ViewComplaints.jsx';   // Import new page
+import CreateAssignment from './pages/educational/CreateAssignment.jsx';
+import ViewComplaints from './pages/educational/ViewComplaints.jsx';
+import MyCalendar from './pages/educational/MyCalendar.jsx';
+import Grading from './pages/educational/Grading.jsx'; // Import the new page
 
 // Professional pages
 import ProDashboard from './pages/professional/ProDashboard.jsx';
@@ -96,11 +100,14 @@ export default function App() {
                     <Route path="/assignments/:id" element={<ProtectedRoute><AssignmentDetail /></ProtectedRoute>} />
                     <Route path="/chat" element={<ProtectedRoute><CohortChat /></ProtectedRoute>} />
                     <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
+                    <Route path="/courses/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
                     <Route path="/grades" element={<ProtectedRoute><Grades /></ProtectedRoute>} />
+                    <Route path="/calendar" element={<ProtectedRoute><MyCalendar /></ProtectedRoute>} />
                     
-                    {/* New Role-Protected Routes */}
+                    {/* Role-Protected Routes */}
                     <Route path="/create-assignment" element={<ProtectedRoute><RoleGuard min="instructor"><CreateAssignment /></RoleGuard></ProtectedRoute>} />
                     <Route path="/view-complaints" element={<ProtectedRoute><RoleGuard min="coordinator"><ViewComplaints /></RoleGuard></ProtectedRoute>} />
+                    <Route path="/grading/assignment/:id" element={<ProtectedRoute><RoleGuard min="instructor"><Grading /></RoleGuard></ProtectedRoute>} /> {/* Add this line */}
                   </>
                 )}
               </Routes>

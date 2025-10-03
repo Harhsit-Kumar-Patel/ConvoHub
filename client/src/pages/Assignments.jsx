@@ -4,7 +4,7 @@ import api from '../lib/api';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Icons } from '../components/Icons';
-import { getUser } from '@/lib/auth';
+import { getUser, hasRoleAtLeast } from '@/lib/auth';
 import { motion } from 'framer-motion';
 
 const containerVariants = {
@@ -29,7 +29,7 @@ export default function Assignments() {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const user = getUser();
-    const isAdmin = user?.role === 'admin';
+    const canGrade = hasRoleAtLeast('instructor');
 
     useEffect(() => {
         api.get('/assignments')
@@ -58,10 +58,12 @@ export default function Assignments() {
                     <h1 className="text-4xl font-bold font-heading">Assignments</h1>
                     <p className="text-muted-foreground">View and manage your course assignments.</p>
                 </div>
-                {isAdmin && (
-                  <Button>
-                      <Icons.notice className="w-4 h-4 mr-2" />
-                      New Assignment
+                {canGrade && (
+                  <Button asChild>
+                      <Link to="/create-assignment">
+                        <Icons.notice className="w-4 h-4 mr-2" />
+                        New Assignment
+                      </Link>
                   </Button>
                 )}
             </header>
@@ -84,7 +86,7 @@ export default function Assignments() {
                                     <h3 className="font-semibold text-lg">{assignment.title}</h3>
                                     <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{assignment.description}</p>
                                 </div>
-                                <div className="w-full md:w-auto flex items-center justify-between gap-4">
+                                <div className="w-full md:w-auto flex items-center justify-between md:justify-end gap-4">
                                     <div className="text-sm text-muted-foreground text-left md:text-center w-32">
                                         <span className="font-medium text-foreground">Due:</span> {new Date(assignment.dueDate).toLocaleDateString()}
                                     </div>
@@ -99,10 +101,16 @@ export default function Assignments() {
                                             </span>
                                         )}
                                     </div>
-                                    <div className="w-28 text-right">
+                                    {/* --- THIS IS THE UPDATED PART --- */}
+                                    <div className="flex items-center justify-end gap-2" style={{ minWidth: canGrade ? '170px' : 'auto' }}>
                                         <Button asChild variant="outline" size="sm">
                                             <Link to={`/assignments/${assignment._id}`}>View Details</Link>
                                         </Button>
+                                        {canGrade && (
+                                            <Button asChild variant="secondary" size="sm">
+                                                <Link to={`/grading/assignment/${assignment._id}`}>Grade</Link>
+                                            </Button>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>

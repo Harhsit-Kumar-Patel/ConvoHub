@@ -1,8 +1,25 @@
 import { Router } from 'express';
 import Assignment from '../models/Assignment.js';
+import Course from '../models/Course.js'; // Import Course model
 import { auth, authorize } from '../middleware/auth.js';
 
+
 const router = Router();
+
+// GET /api/assignments/me - List assignments for the current user's courses
+router.get('/me', auth(true), async (req, res) => {
+  try {
+    // Find courses the current user is enrolled in
+    const userCourses = await Course.find({ students: req.user.id }).select('_id').lean();
+    const courseIds = userCourses.map(course => course._id);
+
+    // Find assignments for those courses
+    const items = await Assignment.find({ course: { $in: courseIds } }).sort({ dueDate: 1 });
+    res.json(items);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to load your assignments' });
+  }
+});
 
 // GET /api/assignments - List all assignments
 router.get('/', auth(true), async (req, res) => {

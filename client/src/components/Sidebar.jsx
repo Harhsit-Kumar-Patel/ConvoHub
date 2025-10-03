@@ -1,3 +1,4 @@
+// client/src/components/Sidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
 import { getUser, isAuthed, logout, hasRoleAtLeast } from '../lib/auth.js';
 import { Button } from './ui/button.jsx';
@@ -8,6 +9,7 @@ const educationalLinks = [
   { to: '/courses', label: 'Courses', icon: Icons.notice },
   { to: '/notices', label: 'Announcements', icon: Icons.notice },
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
+  { to: '/calendar', label: 'My Calendar', icon: Icons.calendar },
   { to: '/create-assignment', label: 'Create Assignment', icon: Icons.notice, minRole: 'instructor' },
   { to: '/grades', label: 'Grades', icon: Icons.chat },
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },

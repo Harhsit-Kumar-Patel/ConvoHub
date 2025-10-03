@@ -1,3 +1,4 @@
+// server/src/models/Assignment.js
 import mongoose from 'mongoose';
 
 const submissionSchema = new mongoose.Schema({
@@ -11,7 +12,7 @@ const AssignmentSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: String,
     dueDate: { type: Date, required: true },
-    cohort: { type: mongoose.Schema.Types.ObjectId, ref: 'Cohort' },
+    course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' }, // Add this line
     submissions: [submissionSchema],
 }, { timestamps: true });
 
