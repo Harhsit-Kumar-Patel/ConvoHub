@@ -21,6 +21,7 @@ import Courses from './pages/educational/Courses.jsx';
 import CourseDetail from './pages/educational/CourseDetail.jsx';
 import CreateCourse from './pages/educational/CreateCourse.jsx';
 import CreateNotice from './pages/educational/CreateNotice.jsx';
+import Gradebook from './pages/educational/Gradebook.jsx'; // Import the new page
 import Grades from './pages/educational/Grades.jsx';
 import CohortChat from './pages/educational/CohortChat.jsx';
 import Assignments from './pages/educational/Assignments.jsx';
@@ -31,12 +32,7 @@ import MyCalendar from './pages/educational/MyCalendar.jsx';
 import Grading from './pages/educational/Grading.jsx';
 
 // Professional pages
-import ProDashboard from './pages/professional/ProDashboard.jsx';
-import Projects from './pages/professional/Projects.jsx';
-import ProjectBoard from './pages/professional/ProjectBoard.jsx';
-import TeamChat from './pages/professional/TeamChat.jsx';
-import ExploreTeams from './pages/professional/ExploreTeams.jsx';
-import Directory from './pages/professional/Directory.jsx';
+// ... (imports)
 import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
 
 
@@ -47,17 +43,8 @@ export default function App() {
 
   const MainDashboard = user?.workspaceType === 'professional' ? ProDashboard : EduDashboard;
 
-  const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    in: { opacity: 1, y: 0 },
-    out: { opacity: 0, y: -20 },
-  };
-
-  const pageTransition = {
-    type: 'tween',
-    ease: 'anticipate',
-    duration: 0.5,
-  };
+  const pageVariants = { /* ... */ };
+  const pageTransition = { /* ... */ };
 
   return (
     <ToastProvider>
@@ -81,20 +68,10 @@ export default function App() {
                       transition={pageTransition}
                     >
                       <Routes location={location}>
-                        <Route path="/" element={<MainDashboard />} />
-                        <Route path="/dashboard" element={<MainDashboard />} />
-                        <Route path="/notices" element={<Notices />} />
-                        <Route path="/direct" element={<Direct />} />
-                        <Route path="/complaints" element={<Complaints />} />
-                        <Route path="/profile" element={<Profile />} />
-
+                        {/* ... (existing routes) */}
                         {user?.workspaceType === 'professional' ? (
                           <>
-                            <Route path="/projects" element={<Projects />} />
-                            <Route path="/projects/:id" element={<ProjectBoard />} />
-                            <Route path="/teams" element={<TeamChat />} />
-                            <Route path="/explore-teams" element={<ExploreTeams />} />
-                            <Route path="/directory" element={<Directory />} />
+                            {/* ... */}
                           </>
                         ) : (
                           <>
@@ -112,6 +89,7 @@ export default function App() {
                             <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
                             <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
                             <Route path="/grading/assignment/:id" element={<RoleGuard min="instructor"><Grading /></RoleGuard>} />
+                            <Route path="/courses/:id/gradebook" element={<RoleGuard min="instructor"><Gradebook /></RoleGuard>} /> {/* Add this line */}
                           </>
                         )}
                       </Routes>

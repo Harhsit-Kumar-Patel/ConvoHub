@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../../lib/api';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { hasRoleAtLeast } from '@/lib/auth'; // Import the role checker
 
 // A simple icon for a file
 const FileIcon = (props) => (
@@ -16,6 +17,7 @@ export default function CourseDetail() {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
+  const canManageCourse = hasRoleAtLeast('instructor'); // Check user role
 
   useEffect(() => {
     setLoading(true);
@@ -36,9 +38,16 @@ export default function CourseDetail() {
   return (
     <div className="p-8 space-y-6">
       <header>
-        <Button asChild variant="outline" size="sm" className="mb-4">
-          <Link to="/courses">← Back to Courses</Link>
-        </Button>
+        <div className="flex justify-between items-center mb-4">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/courses">← Back to Courses</Link>
+          </Button>
+          {canManageCourse && (
+            <Button asChild>
+              <Link to={`/courses/${id}/gradebook`}>View Gradebook</Link>
+            </Button>
+          )}
+        </div>
         <h1 className="text-4xl font-bold font-heading">{course.name}</h1>
         <p className="text-muted-foreground text-lg">{course.code} - Taught by {course.instructor || 'TBA'}</p>
       </header>

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import Course from '../models/Course.js';
-import { auth, authorize } from '../middleware/auth.js'; // Import authorize
+import Assignment from '../models/Assignment.js'; // Import Assignment
+import Grade from '../models/Grade.js'; // Import Grade
+import { auth, authorize } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -48,6 +50,52 @@ router.get('/:id', auth(true), async (req, res) => {
     res.json(item);
   } catch (e) {
     res.status(500).json({ message: 'Failed to load course' });
+  }
+});
+
+// GET /api/courses/:id/gradebook - Get structured data for a course gradebook
+router.get('/:id/gradebook', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Get all assignments for the course to create our columns
+    const assignments = await Assignment.find({ course: id }).select('_id title').lean();
+
+    // 2. Get all students enrolled in the course
+    const course = await Course.findById(id).populate('students', '_id name').lean();
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    const students = course.students;
+
+    // 3. Get all grades for this course
+    const grades = await Grade.find({ course: id }).lean();
+
+    // 4. Structure the data
+    const gradebookData = students.map(student => {
+      const studentGrades = {};
+      assignments.forEach(assignment => {
+        const grade = grades.find(g => 
+          g.student.toString() === student._id.toString() && 
+          g.assignment.toString() === assignment._id.toString()
+        );
+        studentGrades[assignment._id] = grade ? grade.score : 'N/A';
+      });
+      return {
+        studentId: student._id,
+        studentName: student.name,
+        grades: studentGrades,
+      };
+    });
+
+    res.json({
+      assignments, // The columns
+      gradebook: gradebookData, // The rows
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Failed to build gradebook data' });
   }
 });
 
