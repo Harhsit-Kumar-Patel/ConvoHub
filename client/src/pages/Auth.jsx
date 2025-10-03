@@ -17,6 +17,8 @@ const InputField = ({ icon, ...props }) => (
     </div>
 );
 
+const educationalRoles = ['student', 'ta', 'instructor', 'coordinator', 'principal'];
+const professionalRoles = ['member', 'lead', 'manager', 'org_admin'];
 
 export default function Auth() {
   const [mode, setMode] = useState('login');
@@ -24,7 +26,7 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [workspaceType, setWorkspaceType] = useState('educational');
-  const [roleChoice, setRoleChoice] = useState('user'); // 'user' | 'admin'
+  const [role, setRole] = useState('student'); // Default role
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -37,13 +39,7 @@ export default function Auth() {
       const url = mode === 'login' ? `${API}/auth/login` : `${API}/auth/register`;
       const payload = mode === 'login'
         ? { email, password }
-        : {
-            name,
-            email,
-            password,
-            workspaceType,
-            ...(roleChoice === 'admin' ? { role: 'admin' } : {}),
-          };
+        : { name, email, password, workspaceType, role };
       const res = await axios.post(url, payload);
       const { token, user } = res.data || {};
       if (token) {
@@ -64,6 +60,12 @@ export default function Auth() {
   const FADE_UP_ANIMATION_VARIANTS = {
     hidden: { opacity: 0, y: 10 },
     show: { opacity: 1, y: 0, transition: { type: "spring" } },
+  };
+  
+  const handleWorkspaceChange = (type) => {
+    setWorkspaceType(type);
+    // Reset role to the default for the new workspace type
+    setRole(type === 'educational' ? 'student' : 'member');
   };
 
   return (
@@ -95,7 +97,7 @@ export default function Auth() {
             variants={FADE_UP_ANIMATION_VARIANTS}
             animate={error ? { x: [-5, 5, -5, 5, 0], transition: { duration: 0.3 } } : {}}
         >
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={submit} className="mt-6 space-y-4">
               <AnimatePresence mode="popLayout">
                 {mode === 'register' && (
                   <motion.div key="name-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5 }}>
@@ -109,26 +111,29 @@ export default function Auth() {
 
               <AnimatePresence>
                 {mode === 'register' && (
-                  <>
-                    <motion.div key="workspace-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5, delay: 0.1 }} className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">I'm using ConvoHub for...</label>
+                  <motion.div key="register-fields" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+                    <div className="space-y-2 text-left">
+                      <label className="text-sm font-medium text-muted-foreground">Select your workspace</label>
                       <div className="grid grid-cols-2 gap-2">
-                        <Button type="button" variant={workspaceType === 'educational' ? 'default' : 'outline'} onClick={() => setWorkspaceType('educational')}>Education</Button>
-                        <Button type="button" variant={workspaceType === 'professional' ? 'default' : 'outline'} onClick={() => setWorkspaceType('professional')}>Work</Button>
+                        <Button type="button" variant={workspaceType === 'educational' ? 'default' : 'outline'} onClick={() => handleWorkspaceChange('educational')}>Education</Button>
+                        <Button type="button" variant={workspaceType === 'professional' ? 'default' : 'outline'} onClick={() => handleWorkspaceChange('professional')}>Work</Button>
                       </div>
-                    </motion.div>
+                    </div>
 
-                    <motion.div key="role-field" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ type: 'spring', duration: 0.5, delay: 0.15 }} className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">Sign up as</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button type="button" variant={roleChoice === 'user' ? 'default' : 'outline'} onClick={() => setRoleChoice('user')}>User</Button>
-                        <Button type="button" variant={roleChoice === 'admin' ? 'default' : 'outline'} onClick={() => setRoleChoice('admin')}>Admin</Button>
-                      </div>
-                      {roleChoice === 'admin' && (
-                        <p className="text-xs text-amber-600">Note: Admins can create and manage projects and assignments.</p>
-                      )}
-                    </motion.div>
-                  </>
+                    <div className="space-y-2 text-left">
+                      <label htmlFor="role-select" className="text-sm font-medium text-muted-foreground">Select your role</label>
+                      <select
+                        id="role-select"
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        className="block w-full px-3 py-2 bg-background/50 border rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
+                      >
+                        {(workspaceType === 'educational' ? educationalRoles : professionalRoles).map(r => (
+                          <option key={r} value={r} className="capitalize">{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </motion.div>
                 )}
               </AnimatePresence>
 

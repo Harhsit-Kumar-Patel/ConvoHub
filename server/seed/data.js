@@ -1,3 +1,17 @@
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import { connectDB } from '../src/db.js';
+import User from '../src/models/User.js';
+import Notice from '../src/models/Notice.js';
+import Cohort from '../src/models/Cohort.js';
+import Message from '../src/models/Message.js';
+import Complaint from '../src/models/Complaint.js';
+import Assignment from '../src/models/Assignment.js';
+import Project from '../src/models/Project.js';
+import Team from '../src/models/Team.js';
+import Course from '../src/models/Course.js';
+import Grade from '../src/models/Grade.js';
+
 // --- EDUCATIONAL DATA ---
 export const educationalUsers = [
   // Test users for each role
@@ -73,3 +87,46 @@ export const projects = [
     ]
   },
 ];
+
+
+async function run() {
+  await connectDB();
+  console.log('Clearing database...');
+  await Promise.all([
+    User.deleteMany({}),
+    Notice.deleteMany({}),
+    Cohort.deleteMany({}),
+    Message.deleteMany({}),
+    Complaint.deleteMany({}),
+    Assignment.deleteMany({}),
+    Project.deleteMany({}),
+    Team.deleteMany({}),
+    Course.deleteMany({}),
+    Grade.deleteMany({}),
+  ]);
+
+  console.log('Seeding data...');
+  const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'password';
+  const hashed = await bcrypt.hash(DEMO_PASSWORD, 10);
+
+  const allUsers = [
+    ...educationalUsers.map(u => ({ ...u, passwordHash: hashed })),
+    ...professionalUsers.map(u => ({ ...u, passwordHash: hashed })),
+  ];
+
+  await User.insertMany(allUsers);
+  await Cohort.insertMany(cohorts);
+  await Notice.insertMany(notices);
+  await Course.insertMany(courses);
+  await Assignment.insertMany(assignments);
+  await Team.insertMany(teams);
+  await Project.insertMany(projects);
+
+  console.log('Seed completed successfully!');
+  await mongoose.connection.close();
+}
+
+run().catch((e) => {
+  console.error('Seed script failed:', e);
+  process.exit(1);
+});

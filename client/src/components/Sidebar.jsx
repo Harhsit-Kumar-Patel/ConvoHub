@@ -8,11 +8,12 @@ const educationalLinks = [
   { to: '/courses', label: 'Courses', icon: Icons.notice },
   { to: '/notices', label: 'Announcements', icon: Icons.notice },
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
+  { to: '/create-assignment', label: 'Create Assignment', icon: Icons.notice, minRole: 'instructor' },
   { to: '/grades', label: 'Grades', icon: Icons.chat },
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
-  { to: '/school-admin', label: 'Admin Panel', icon: Icons.dashboard, minRole: 'principal' },
+  { to: '/view-complaints', label: 'View Complaints', icon: Icons.dm, minRole: 'coordinator' },
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 

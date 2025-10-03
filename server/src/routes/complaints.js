@@ -32,24 +32,14 @@ router.get('/me', auth(true), async (req, res) => {
   }
 });
 
-// Get all complaints (educational: coordinator+)
-router.get('/all', auth(true), authorize({ min: 'coordinator', workspaceOnly: 'educational' }), async (req, res) => {
-  try {
-    const items = await Complaint.find().sort({ createdAt: -1 });
-    res.json(items);
-  } catch (e) {
-    res.status(500).json({ message: 'Failed to load complaints' });
-  }
-});
-
 // GET all complaints (for coordinators and above)
 router.get('/all', auth(true), authorize({ min: 'coordinator', workspaceOnly: 'educational' }), async (req, res) => {
-  try {
-    const items = await Complaint.find({}).sort({ createdAt: -1 });
-    res.json(items);
-  } catch (e) {
-    res.status(500).json({ message: 'Failed to load complaints' });
-  }
+    try {
+      const items = await Complaint.find({}).sort({ createdAt: -1 });
+      res.json(items);
+    } catch (e) {
+      res.status(500).json({ message: 'Failed to load complaints' });
+    }
 });
 
 export default router;

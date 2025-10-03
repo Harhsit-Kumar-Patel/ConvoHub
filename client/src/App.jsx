@@ -21,7 +21,8 @@ import Grades from './pages/educational/Grades.jsx';
 import CohortChat from './pages/educational/CohortChat.jsx';
 import Assignments from './pages/educational/Assignments.jsx';
 import AssignmentDetail from './pages/educational/AssignmentDetail.jsx';
-import SchoolAdminPage from './pages/SchoolAdminPage.jsx';
+import CreateAssignment from './pages/educational/CreateAssignment.jsx'; // Import new page
+import ViewComplaints from './pages/educational/ViewComplaints.jsx';   // Import new page
 
 // Professional pages
 import ProDashboard from './pages/professional/ProDashboard.jsx';
@@ -96,16 +97,10 @@ export default function App() {
                     <Route path="/chat" element={<ProtectedRoute><CohortChat /></ProtectedRoute>} />
                     <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
                     <Route path="/grades" element={<ProtectedRoute><Grades /></ProtectedRoute>} />
-                    <Route
-                      path="/school-admin"
-                      element={
-                        <ProtectedRoute>
-                          <RoleGuard min="principal" workspace="educational">
-                            <SchoolAdminPage />
-                          </RoleGuard>
-                        </ProtectedRoute>
-                      }
-                    />
+                    
+                    {/* New Role-Protected Routes */}
+                    <Route path="/create-assignment" element={<ProtectedRoute><RoleGuard min="instructor"><CreateAssignment /></RoleGuard></ProtectedRoute>} />
+                    <Route path="/view-complaints" element={<ProtectedRoute><RoleGuard min="coordinator"><ViewComplaints /></RoleGuard></ProtectedRoute>} />
                   </>
                 )}
               </Routes>
