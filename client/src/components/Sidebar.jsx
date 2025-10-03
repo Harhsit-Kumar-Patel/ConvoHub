@@ -1,4 +1,3 @@
-// client/src/components/Sidebar.jsx
 import { Link, useLocation } from 'react-router-dom';
 import { getUser, isAuthed, logout, hasRoleAtLeast } from '../lib/auth.js';
 import { Button } from './ui/button.jsx';
@@ -7,6 +6,7 @@ import { Icons } from './Icons.jsx';
 const educationalLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
   { to: '/courses', label: 'Courses', icon: Icons.notice },
+  { to: '/create-course', label: 'Create Course', icon: Icons.notice, minRole: 'instructor' }, // Add this
   { to: '/notices', label: 'Announcements', icon: Icons.notice },
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
   { to: '/calendar', label: 'My Calendar', icon: Icons.calendar },

@@ -19,6 +19,7 @@ import Notices from './pages/Notices.jsx';
 import EduDashboard from './pages/educational/EduDashboard.jsx';
 import Courses from './pages/educational/Courses.jsx';
 import CourseDetail from './pages/educational/CourseDetail.jsx';
+import CreateCourse from './pages/educational/CreateCourse.jsx'; // Import the new page
 import Grades from './pages/educational/Grades.jsx';
 import CohortChat from './pages/educational/CohortChat.jsx';
 import Assignments from './pages/educational/Assignments.jsx';
@@ -26,7 +27,7 @@ import AssignmentDetail from './pages/educational/AssignmentDetail.jsx';
 import CreateAssignment from './pages/educational/CreateAssignment.jsx';
 import ViewComplaints from './pages/educational/ViewComplaints.jsx';
 import MyCalendar from './pages/educational/MyCalendar.jsx';
-import Grading from './pages/educational/Grading.jsx'; // Import the new page
+import Grading from './pages/educational/Grading.jsx';
 
 // Professional pages
 import ProDashboard from './pages/professional/ProDashboard.jsx';
@@ -106,8 +107,9 @@ export default function App() {
                     
                     {/* Role-Protected Routes */}
                     <Route path="/create-assignment" element={<ProtectedRoute><RoleGuard min="instructor"><CreateAssignment /></RoleGuard></ProtectedRoute>} />
+                    <Route path="/create-course" element={<ProtectedRoute><RoleGuard min="instructor"><CreateCourse /></RoleGuard></ProtectedRoute>} /> {/* Add this line */}
                     <Route path="/view-complaints" element={<ProtectedRoute><RoleGuard min="coordinator"><ViewComplaints /></RoleGuard></ProtectedRoute>} />
-                    <Route path="/grading/assignment/:id" element={<ProtectedRoute><RoleGuard min="instructor"><Grading /></RoleGuard></ProtectedRoute>} /> {/* Add this line */}
+                    <Route path="/grading/assignment/:id" element={<ProtectedRoute><RoleGuard min="instructor"><Grading /></RoleGuard></ProtectedRoute>} />
                   </>
                 )}
               </Routes>
