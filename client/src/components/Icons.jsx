@@ -50,4 +50,25 @@ export const Icons = {
       <line x1="3" x2="21" y1="10" y2="10" />
     </svg>
   ),
+  authIllustration: (props) => (
+    <svg width="100%" height="100%" viewBox="0 0 425 425" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <rect width="425" height="425" rx="24" fill="url(#paint0_linear_143:40)"/>
+      <path d="M309 116H116V309H309V116Z" fill="#E2E8F0"/>
+      <path d="M129 116H116V309H129V116Z" fill="#94A3B8"/>
+      <path d="M116 129V116H309V129H116Z" fill="#94A3B8"/>
+      <rect x="132" y="146" width="162" height="15" rx="3" fill="#CBD5E1"/>
+      <rect x="132" y="171" width="162" height="15" rx="3" fill="#CBD5E1"/>
+      <rect x="132" y="200" width="162" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="132" y="213" width="162" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="132" y="226" width="128" height="8" rx="2" fill="#E2E8F0"/>
+      <rect x="132" y="259" width="60" height="24" rx="4" fill="#475569"/>
+      <circle cx="282" cy="271" r="12" fill="#475569"/>
+      <defs>
+        <linearGradient id="paint0_linear_143:40" x1="0" y1="0" x2="425" y2="425" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#60A5FA"/>
+          <stop offset="1" stopColor="#FBBF24"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  ),
 };
