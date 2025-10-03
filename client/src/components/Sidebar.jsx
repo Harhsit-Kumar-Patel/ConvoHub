@@ -6,8 +6,9 @@ import { Icons } from './Icons.jsx';
 const educationalLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
   { to: '/courses', label: 'Courses', icon: Icons.notice },
-  { to: '/create-course', label: 'Create Course', icon: Icons.notice, minRole: 'instructor' }, // Add this
+  { to: '/create-course', label: 'Create Course', icon: Icons.notice, minRole: 'instructor' },
   { to: '/notices', label: 'Announcements', icon: Icons.notice },
+  { to: '/create-notice', label: 'Post Notice', icon: Icons.notice, minRole: 'instructor' }, // Add this
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
   { to: '/calendar', label: 'My Calendar', icon: Icons.calendar },
   { to: '/create-assignment', label: 'Create Assignment', icon: Icons.notice, minRole: 'instructor' },

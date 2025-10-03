@@ -19,7 +19,8 @@ import Notices from './pages/Notices.jsx';
 import EduDashboard from './pages/educational/EduDashboard.jsx';
 import Courses from './pages/educational/Courses.jsx';
 import CourseDetail from './pages/educational/CourseDetail.jsx';
-import CreateCourse from './pages/educational/CreateCourse.jsx'; // Import the new page
+import CreateCourse from './pages/educational/CreateCourse.jsx';
+import CreateNotice from './pages/educational/CreateNotice.jsx';
 import Grades from './pages/educational/Grades.jsx';
 import CohortChat from './pages/educational/CohortChat.jsx';
 import Assignments from './pages/educational/Assignments.jsx';
@@ -41,7 +42,6 @@ import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
 
 export default function App() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/auth';
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const user = getUser();
 
@@ -61,63 +61,69 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <div className={`flex h-screen ${isAuthPage ? '' : 'bg-background'}`}>
-        {!isAuthPage && (
-          <Sidebar isMobileOpen={mobileSidebarOpen} onMobileClose={() => setMobileSidebarOpen(false)} />
-        )}
-        <main className="flex-1 overflow-y-auto">
-          {!isAuthPage && (
-            <Header onOpenMobileSidebar={() => setMobileSidebarOpen(true)} />
-          )}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial="initial"
-              animate="in"
-              exit="out"
-              variants={pageVariants}
-              transition={pageTransition}
-            >
-              <Routes location={location}>
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/" element={<ProtectedRoute><MainDashboard /></ProtectedRoute>} />
-                <Route path="/dashboard" element={<ProtectedRoute><MainDashboard /></ProtectedRoute>} />
-                <Route path="/notices" element={<ProtectedRoute><Notices /></ProtectedRoute>} />
-                <Route path="/direct" element={<ProtectedRoute><Direct /></ProtectedRoute>} />
-                <Route path="/complaints" element={<ProtectedRoute><Complaints /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Routes>
+        <Route path="/auth" element={<Auth />} />
+        <Route
+          path="*"
+          element={
+            <ProtectedRoute>
+              <div className="flex h-screen bg-background">
+                <Sidebar isMobileOpen={mobileSidebarOpen} onMobileClose={() => setMobileSidebarOpen(false)} />
+                <main className="flex-1 overflow-y-auto">
+                  <Header onOpenMobileSidebar={() => setMobileSidebarOpen(true)} />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={location.pathname}
+                      initial="initial"
+                      animate="in"
+                      exit="out"
+                      variants={pageVariants}
+                      transition={pageTransition}
+                    >
+                      <Routes location={location}>
+                        <Route path="/" element={<MainDashboard />} />
+                        <Route path="/dashboard" element={<MainDashboard />} />
+                        <Route path="/notices" element={<Notices />} />
+                        <Route path="/direct" element={<Direct />} />
+                        <Route path="/complaints" element={<Complaints />} />
+                        <Route path="/profile" element={<Profile />} />
 
-                {user?.workspaceType === 'professional' ? (
-                  <>
-                    <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-                    <Route path="/projects/:id" element={<ProtectedRoute><ProjectBoard /></ProtectedRoute>} />
-                    <Route path="/teams" element={<ProtectedRoute><TeamChat /></ProtectedRoute>} />
-                    <Route path="/explore-teams" element={<ProtectedRoute><ExploreTeams /></ProtectedRoute>} />
-                    <Route path="/directory" element={<ProtectedRoute><Directory /></ProtectedRoute>} />
-                  </>
-                ) : (
-                  <>
-                    <Route path="/assignments" element={<ProtectedRoute><Assignments /></ProtectedRoute>} />
-                    <Route path="/assignments/:id" element={<ProtectedRoute><AssignmentDetail /></ProtectedRoute>} />
-                    <Route path="/chat" element={<ProtectedRoute><CohortChat /></ProtectedRoute>} />
-                    <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
-                    <Route path="/courses/:id" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
-                    <Route path="/grades" element={<ProtectedRoute><Grades /></ProtectedRoute>} />
-                    <Route path="/calendar" element={<ProtectedRoute><MyCalendar /></ProtectedRoute>} />
-                    
-                    {/* Role-Protected Routes */}
-                    <Route path="/create-assignment" element={<ProtectedRoute><RoleGuard min="instructor"><CreateAssignment /></RoleGuard></ProtectedRoute>} />
-                    <Route path="/create-course" element={<ProtectedRoute><RoleGuard min="instructor"><CreateCourse /></RoleGuard></ProtectedRoute>} /> {/* Add this line */}
-                    <Route path="/view-complaints" element={<ProtectedRoute><RoleGuard min="coordinator"><ViewComplaints /></RoleGuard></ProtectedRoute>} />
-                    <Route path="/grading/assignment/:id" element={<ProtectedRoute><RoleGuard min="instructor"><Grading /></RoleGuard></ProtectedRoute>} />
-                  </>
-                )}
-              </Routes>
-            </motion.div>
-          </AnimatePresence>
-        </main>
-        <ToastViewport />
-      </div>
+                        {user?.workspaceType === 'professional' ? (
+                          <>
+                            <Route path="/projects" element={<Projects />} />
+                            <Route path="/projects/:id" element={<ProjectBoard />} />
+                            <Route path="/teams" element={<TeamChat />} />
+                            <Route path="/explore-teams" element={<ExploreTeams />} />
+                            <Route path="/directory" element={<Directory />} />
+                          </>
+                        ) : (
+                          <>
+                            <Route path="/assignments" element={<Assignments />} />
+                            <Route path="/assignments/:id" element={<AssignmentDetail />} />
+                            <Route path="/chat" element={<CohortChat />} />
+                            <Route path="/courses" element={<Courses />} />
+                            <Route path="/courses/:id" element={<CourseDetail />} />
+                            <Route path="/grades" element={<Grades />} />
+                            <Route path="/calendar" element={<MyCalendar />} />
+                            
+                            {/* Role-Protected Routes */}
+                            <Route path="/create-assignment" element={<RoleGuard min="instructor"><CreateAssignment /></RoleGuard>} />
+                            <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
+                            <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
+                            <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
+                            <Route path="/grading/assignment/:id" element={<RoleGuard min="instructor"><Grading /></RoleGuard>} />
+                          </>
+                        )}
+                      </Routes>
+                    </motion.div>
+                  </AnimatePresence>
+                </main>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      <ToastViewport />
     </ToastProvider>
   );
 }
