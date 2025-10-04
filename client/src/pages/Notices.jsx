@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs.jsx';
+import api from '../lib/api'; // Use the shared API instance
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog.jsx';
-
-const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export default function Notices() {
   const [items, setItems] = useState([]);
@@ -16,8 +14,8 @@ export default function Notices() {
 
   useEffect(() => {
     setLoading(true);
-    axios
-      .get(`${API}/notices`)
+    // Correctly use the authenticated 'api' instance
+    api.get('/notices')
       .then((res) => setItems(res.data))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
@@ -54,8 +52,8 @@ export default function Notices() {
   return (
     <section className="p-6">
       <div className="mb-5 space-y-3">
-        <h2 className="text-3xl font-extrabold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-info via-accent to-secondary">Notices</h2>
-        <p className="text-slate-600 dark:text-slate-400">Stay in the loop with the latest announcements.</p>
+        <h2 className="text-3xl font-extrabold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Notices</h2>
+        <p className="text-muted-foreground">Stay in the loop with the latest announcements.</p>
         <div className="flex flex-col md:flex-row md:items-center gap-3">
           <Tabs value={tab} onValueChange={setTab}>
             <TabsList>
@@ -104,19 +102,19 @@ export default function Notices() {
           >
             <div className="flex items-center gap-2">
               {n.pinned && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-gradient-to-r from-warning to-secondary text-white shadow">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white shadow">
                   Pinned
                 </span>
               )}
               <h3 className="text-lg font-semibold">{n.title}</h3>
             </div>
-            <p className="text-slate-700 dark:text-slate-300 mt-1 whitespace-pre-wrap">{n.body}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">By {n.author || 'Admin'} • {new Date(n.createdAt).toLocaleString()}</p>
+            <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{n.body}</p>
+            <p className="text-xs text-muted-foreground mt-2">By {n.author || 'Admin'} • {new Date(n.createdAt).toLocaleString()}</p>
           </motion.div>
         ))}
         {filtered.length === 0 && (
           !loading && (
-            <div className="rounded-2xl border border-dashed bg-white/40 dark:bg-slate-900/40 backdrop-blur p-6 text-center text-slate-500 dark:text-slate-400">
+            <div className="rounded-2xl border border-dashed bg-white/40 dark:bg-slate-900/40 backdrop-blur p-6 text-center text-muted-foreground">
               No notices yet.
             </div>
           )
