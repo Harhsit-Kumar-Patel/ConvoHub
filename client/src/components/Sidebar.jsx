@@ -16,8 +16,9 @@ const educationalLinks = [
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
-  { to: '/analytics', label: 'Analytics', icon: Icons.dashboard, minRole: 'coordinator' }, // --- NEW ---
+  { to: '/analytics', label: 'Analytics', icon: Icons.dashboard, minRole: 'coordinator' },
   { to: '/view-complaints', label: 'View Complaints', icon: Icons.dm, minRole: 'coordinator' },
+  { to: '/user-management', label: 'User Management', icon: Icons.profile, minRole: 'principal' }, // --- NEW ---
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
