@@ -18,7 +18,7 @@ const educationalLinks = [
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
   { to: '/analytics', label: 'Analytics', icon: Icons.dashboard, minRole: 'coordinator' },
   { to: '/view-complaints', label: 'View Complaints', icon: Icons.dm, minRole: 'coordinator' },
-  { to: '/user-management', label: 'User Management', icon: Icons.profile, minRole: 'principal' }, // --- NEW ---
+  { to: '/user-management', label: 'User Management', icon: Icons.profile, minRole: 'principal' },
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
@@ -34,27 +34,24 @@ const professionalLinks = [
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 
-
 export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { } }) {
   const location = useLocation();
   const user = getUser();
   const authed = isAuthed();
-
   const navLinks = user?.workspaceType === 'professional' ? professionalLinks : educationalLinks;
 
   const handleLogout = () => {
     logout();
     window.location.href = '/auth';
-  }
+  };
 
-  if (!authed) {
-    return null;
-  }
+  if (!authed) return null;
 
   const SidebarBody = (
-    <div className="w-64 bg-card border-r p-4 h-full flex flex-col justify-between">
-      <div>
-        <div className="p-4 flex items-center gap-2">
+    <div className="w-64 bg-card border-r h-full flex flex-col">
+      {/* Header (fixed) */}
+      <div className="p-4 flex-shrink-0">
+        <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Icons.chat className="w-5 h-5 text-primary-foreground" />
           </div>
@@ -62,28 +59,30 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { 
             ConvoHub
           </Link>
         </div>
-        <nav className="mt-8 space-y-1">
-          {navLinks.map(link => {
-            if (link.minRole && !hasRoleAtLeast(link.minRole)) {
-              return null;
-            }
-            const isActive = location.pathname === link.to || location.pathname.startsWith(`${link.to}/`);
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={onMobileClose}
-                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
-                  ${isActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}
-              >
-                <link.icon className="w-5 h-5" />
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
       </div>
-      <div>
+      
+      {/* Navigation (scrollable) */}
+      <nav className="flex-1 mt-4 px-4 space-y-1 overflow-y-auto">
+        {navLinks.map(link => {
+          if (link.minRole && !hasRoleAtLeast(link.minRole)) return null;
+          const isActive = location.pathname === link.to || (link.to !== '/dashboard' && location.pathname.startsWith(`${link.to}/`));
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              onClick={onMobileClose}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                ${isActive ? 'bg-primary/10 text-primary font-semibold' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}`}
+            >
+              <link.icon className="w-5 h-5" />
+              <span>{link.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer (fixed) */}
+      <div className="flex-shrink-0">
         <div className="p-4 border-t">
           <p className="text-sm font-semibold">{user?.name}</p>
           <p className="text-xs text-muted-foreground">{user?.email}</p>
@@ -97,14 +96,13 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { 
 
   return (
     <>
-      <aside className="hidden md:flex md:flex-col md:h-screen md:sticky md:top-0">
+      <aside className="hidden md:block flex-shrink-0">
         {SidebarBody}
       </aside>
-
       {isMobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-black/40" onClick={onMobileClose} />
-          <div className="absolute left-0 top-0 h-full shadow-lg animate-in slide-in-from-left w-64 bg-card border-r">
+          <div className="absolute left-0 top-0 h-full shadow-lg animate-in slide-in-from-left">
             {SidebarBody}
           </div>
         </div>
@@ -112,3 +110,5 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { 
     </>
   );
 }
+
+

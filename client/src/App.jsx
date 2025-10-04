@@ -8,15 +8,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { getUser } from './lib/auth.js';
 import RoleGuard from './components/RoleGuard.jsx';
 
-// Shared pages
+// Import all pages
 import Auth from './pages/Auth.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 import Direct from './pages/Direct.jsx';
 import Complaints from './pages/Complaints.jsx';
 import Profile from './pages/Profile.jsx';
 import Notices from './pages/Notices.jsx';
-import Dashboard from './pages/Dashboard.jsx'; // Unified Dashboard
-
-// Educational pages
 import Courses from './pages/educational/Courses.jsx';
 import CourseDetail from './pages/educational/CourseDetail.jsx';
 import CreateCourse from './pages/educational/CreateCourse.jsx';
@@ -32,9 +30,7 @@ import MyCalendar from './pages/educational/MyCalendar.jsx';
 import Grading from './pages/educational/Grading.jsx';
 import ManageCourse from './pages/educational/ManageCourse.jsx';
 import AnalyticsDashboard from './pages/educational/AnalyticsDashboard.jsx';
-import UserManagement from './pages/educational/UserManagement.jsx'; // --- NEW ---
-
-// Professional pages
+import UserManagement from './pages/educational/UserManagement.jsx';
 import Projects from './pages/professional/Projects.jsx';
 import ProjectBoard from './pages/professional/ProjectBoard.jsx';
 import TeamChat from './pages/professional/TeamChat.jsx';
@@ -50,36 +46,38 @@ const AppLayout = () => {
   const location = useLocation();
 
   const pageVariants = {
-    initial: { opacity: 0, y: 10 },
-    in: { opacity: 1, y: 0 },
-    out: { opacity: 0, y: -10 },
+    initial: { opacity: 0, scale: 0.99 },
+    in: { opacity: 1, scale: 1 },
+    out: { opacity: 0, scale: 0.99 },
   };
+
   const pageTransition = {
     type: 'tween',
-    ease: 'anticipate',
-    duration: 0.4,
+    ease: 'circOut',
+    duration: 0.3,
   };
 
   return (
     <div className="flex h-screen bg-background">
       <Sidebar isMobileOpen={mobileSidebarOpen} onMobileClose={() => setMobileSidebarOpen(false)} />
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header onOpenMobileSidebar={() => setMobileSidebarOpen(true)} />
-        <div className="flex-1 overflow-y-auto">
+        <main className="flex-1 relative overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
+              className="w-full h-full p-6 md:p-8"
               initial="initial"
               animate="in"
               exit="out"
               variants={pageVariants}
               transition={pageTransition}
             >
-              <Outlet /> {/* Child routes will render here */}
+              <Outlet />
             </motion.div>
           </AnimatePresence>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
@@ -94,7 +92,6 @@ export default function App() {
       <Routes>
         <Route path="/auth" element={<Auth />} />
         
-        {/* All authenticated routes are now children of this route */}
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/" element={<Dashboard />} />
@@ -106,7 +103,6 @@ export default function App() {
 
             {isProfessional ? (
               <>
-                {/* Professional Routes */}
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:id" element={<ProjectBoard />} />
                 <Route path="/teams" element={<TeamChat />} />
@@ -115,7 +111,6 @@ export default function App() {
               </>
             ) : (
               <>
-                {/* Educational Routes */}
                 <Route path="/assignments" element={<Assignments />} />
                 <Route path="/assignments/:id" element={<AssignmentDetail />} />
                 <Route path="/chat" element={<CohortChat />} />
@@ -124,13 +119,12 @@ export default function App() {
                 <Route path="/grades" element={<Grades />} />
                 <Route path="/calendar" element={<MyCalendar />} />
                 
-                {/* Role-Protected Educational Routes */}
                 <Route path="/create-assignment" element={<RoleGuard min="instructor"><CreateAssignment /></RoleGuard>} />
                 <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
                 <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
                 <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
                 <Route path="/analytics" element={<RoleGuard min="coordinator"><AnalyticsDashboard /></RoleGuard>} />
-                <Route path="/user-management" element={<RoleGuard min="principal"><UserManagement /></RoleGuard>} /> {/* --- NEW --- */}
+                <Route path="/user-management" element={<RoleGuard min="principal"><UserManagement /></RoleGuard>} />
                 <Route path="/grading/assignment/:id" element={<RoleGuard min="instructor"><Grading /></RoleGuard>} />
                 <Route path="/courses/:id/gradebook" element={<RoleGuard min="instructor"><Gradebook /></RoleGuard>} />
                 <Route path="/courses/:id/manage" element={<RoleGuard min="instructor"><ManageCourse /></RoleGuard>} />

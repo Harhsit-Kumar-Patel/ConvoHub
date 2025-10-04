@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import api from '@/lib/api'; // Import the api utility
+import api from '@/lib/api';
 import { motion } from 'framer-motion';
 
 // Animation variants for the list
@@ -27,10 +27,9 @@ export default function MyCalendar() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch assignments for the current user
-    api.get('/assignments/me')
+    // UPDATED: Fetch from '/assignments' instead of '/assignments/me'
+    api.get('/assignments')
       .then(res => {
-        // Sort assignments by due date
         const sorted = (res.data || []).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
         setAssignments(sorted);
       })
@@ -40,13 +39,13 @@ export default function MyCalendar() {
       .finally(() => {
         setLoading(false);
       });
-  }, []); // The empty dependency array ensures this runs only once
+  }, []);
 
   return (
     <div className="p-8 space-y-6">
       <header>
         <h1 className="text-4xl font-bold font-heading">My Calendar</h1>
-        <p className="text-muted-foreground">Your personalized schedule of assignment due dates and events.</p>
+        <p className="text-muted-foreground">A schedule of all assignment due dates and events in the workspace.</p>
       </header>
 
       <Card>
@@ -57,7 +56,7 @@ export default function MyCalendar() {
           {loading ? (
             <p className="text-muted-foreground">Loading deadlines...</p>
           ) : assignments.length === 0 ? (
-            <p className="text-muted-foreground">No upcoming assignment deadlines found for your enrolled courses.</p>
+            <p className="text-muted-foreground">No upcoming assignment deadlines found.</p>
           ) : (
             <motion.div 
               className="space-y-3"
