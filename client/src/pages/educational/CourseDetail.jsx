@@ -43,9 +43,14 @@ export default function CourseDetail() {
             <Link to="/courses">← Back to Courses</Link>
           </Button>
           {canManageCourse && (
-            <Button asChild>
-              <Link to={`/courses/${id}/gradebook`}>View Gradebook</Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button asChild>
+                <Link to={`/courses/${id}/gradebook`}>View Gradebook</Link>
+              </Button>
+              <Button asChild variant="secondary">
+                <Link to={`/courses/${id}/manage`}>Manage Course</Link>
+              </Button>
+            </div>
           )}
         </div>
         <h1 className="text-4xl font-bold font-heading">{course.name}</h1>

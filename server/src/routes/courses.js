@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Course from '../models/Course.js';
 import Assignment from '../models/Assignment.js'; // Import Assignment
 import Grade from '../models/Grade.js'; // Import Grade
+import User from '../models/User.js'; // Import User
 import { auth, authorize } from '../middleware/auth.js';
 
 const router = Router();
@@ -45,13 +46,71 @@ router.post('/', auth(true), authorize({ min: 'instructor' }), async (req, res) 
 // GET /api/courses/:id - get one course
 router.get('/:id', auth(true), async (req, res) => {
   try {
-    const item = await Course.findById(req.params.id).lean();
+    const item = await Course.findById(req.params.id).populate('students', 'name email').lean();
     if (!item) return res.status(404).json({ message: 'Course not found' });
     res.json(item);
   } catch (e) {
     res.status(500).json({ message: 'Failed to load course' });
   }
 });
+
+// --- NEW ---
+// PUT /api/courses/:id - Update a course (instructor+)
+router.put('/:id', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
+  try {
+    const { name, code, instructor, description } = req.body;
+    const updatedCourse = await Course.findByIdAndUpdate(
+      req.params.id,
+      { name, code, instructor, description },
+      { new: true }
+    );
+    if (!updatedCourse) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+    res.json(updatedCourse);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to update course' });
+  }
+});
+
+// --- NEW ---
+// POST /api/courses/:id/enroll - Enroll a student (instructor+)
+router.post('/:id/enroll', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
+    try {
+        const { studentId } = req.body;
+        const course = await Course.findById(req.params.id);
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        const student = await User.findById(studentId);
+        if (!student) return res.status(404).json({ message: 'Student not found' });
+
+        if (course.students.includes(studentId)) {
+            return res.status(409).json({ message: 'Student already enrolled' });
+        }
+
+        course.students.push(studentId);
+        await course.save();
+        res.status(200).json(course);
+    } catch (e) {
+        res.status(500).json({ message: 'Failed to enroll student' });
+    }
+});
+
+// --- NEW ---
+// DELETE /api/courses/:id/students/:studentId - Remove a student from a course (instructor+)
+router.delete('/:id/students/:studentId', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.id);
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        course.students.pull(req.params.studentId);
+        await course.save();
+        res.status(200).json(course);
+    } catch (e) {
+        res.status(500).json({ message: 'Failed to remove student' });
+    }
+});
+
 
 // GET /api/courses/:id/gradebook - Get structured data for a course gradebook
 router.get('/:id/gradebook', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
