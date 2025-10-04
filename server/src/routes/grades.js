@@ -19,9 +19,9 @@ router.get('/me', auth(), async (req, res) => {
   }
 });
 
-// --- NEW ---
-// GET /api/grades/all - Get all grades for admin view (Principal+)
-router.get('/all', auth(true), authorize({ min: 'principal' }), async (req, res) => {
+// --- CORRECTED ---
+// GET /api/grades/all - Get all grades for admin view (Instructor+)
+router.get('/all', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
     try {
         const items = await Grade.find()
             .populate('student', 'name')

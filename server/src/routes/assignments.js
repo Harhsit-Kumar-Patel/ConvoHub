@@ -1,19 +1,19 @@
 import { Router } from 'express';
 import Assignment from '../models/Assignment.js';
-import Course from '../models/Course.js'; // Import Course model
+import Course from '../models/Course.js';
+import Grade from '../models/Grade.js'; // Import the Grade model
 import { auth, authorize } from '../middleware/auth.js';
-import upload from '../middleware/upload.js'; // Import the upload middleware
+import upload from '../middleware/upload.js';
 
 const router = Router();
+
+// --- Existing Routes (No changes needed here) ---
 
 // GET /api/assignments/me - List assignments for the current user's courses
 router.get('/me', auth(true), async (req, res) => {
   try {
-    // Find courses the current user is enrolled in
     const userCourses = await Course.find({ students: req.user.id }).select('_id').lean();
     const courseIds = userCourses.map((course) => course._id);
-
-    // Find assignments for those courses
     const items = await Assignment.find({ course: { $in: courseIds } }).sort({ dueDate: 1 });
     res.json(items);
   } catch (e) {
@@ -60,7 +60,6 @@ router.get('/:id', auth(true), async (req, res) => {
   }
 });
 
-// Submission endpoints
 // POST /api/assignments/:id/submissions - create or replace current user's submission
 router.post('/:id/submissions', auth(), upload, async (req, res) => {
   try {
@@ -70,9 +69,7 @@ router.post('/:id/submissions', auth(), upload, async (req, res) => {
     const doc = await Assignment.findById(id);
     if (!doc) return res.status(404).json({ message: 'Assignment not found' });
 
-    // Remove existing submission by user if exists, then push new one
     doc.submissions = (doc.submissions || []).filter((s) => String(s.student) !== String(userId));
-
     const newSubmission = {
       student: userId,
       submittedAt: new Date(),
@@ -85,7 +82,6 @@ router.post('/:id/submissions', auth(), upload, async (req, res) => {
         originalName: file.originalname,
       })),
     };
-
     doc.submissions.push(newSubmission);
     await doc.save();
     return res.json({ ok: true });
@@ -107,5 +103,65 @@ router.get('/:id/submissions/me', auth(), async (req, res) => {
     return res.status(500).json({ message: 'Failed to load submission' });
   }
 });
+
+// --- NEW GRADING ROUTES ---
+
+// GET /api/assignments/:id/submissions - Get all submissions for an assignment (instructor+)
+router.get('/:id/submissions', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
+  try {
+    const assignment = await Assignment.findById(req.params.id)
+      .populate('submissions.student', 'name email')
+      .lean();
+    if (!assignment) {
+      return res.status(404).json({ message: 'Assignment not found' });
+    }
+    res.json(assignment.submissions || []);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to load submissions' });
+  }
+});
+
+// POST /api/assignments/:assignmentId/submissions/:submissionId/grade - Grade a submission (instructor+)
+router.post(
+  '/:assignmentId/submissions/:submissionId/grade',
+  auth(true),
+  authorize({ min: 'instructor' }),
+  async (req, res) => {
+    try {
+      const { assignmentId, submissionId } = req.params;
+      const { grade, feedback } = req.body;
+
+      const assignment = await Assignment.findById(assignmentId);
+      if (!assignment) return res.status(404).json({ message: 'Assignment not found' });
+
+      const submission = assignment.submissions.id(submissionId);
+      if (!submission) return res.status(404).json({ message: 'Submission not found' });
+
+      // Update the submission sub-document
+      submission.grade = grade;
+      submission.feedback = feedback;
+      await assignment.save();
+
+      // Create or update the master Grade document
+      // This is useful for the student's "My Grades" page
+      await Grade.findOneAndUpdate(
+        { student: submission.student, assignment: assignmentId },
+        {
+          student: submission.student,
+          assignment: assignmentId,
+          course: assignment.course,
+          score: grade,
+          feedback: feedback,
+        },
+        { upsert: true, new: true }
+      );
+
+      res.json(submission);
+    } catch (e) {
+      console.error('Grading error:', e);
+      res.status(500).json({ message: 'Failed to save grade' });
+    }
+  }
+);
 
 export default router;

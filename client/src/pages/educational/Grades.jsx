@@ -6,12 +6,13 @@ export default function Grades() {
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = getUser();
-  const isAdminView = hasRoleAtLeast('principal');
+  // CORRECTED: Changed 'principal' to 'instructor'
+  const isAdminView = hasRoleAtLeast('instructor');
 
   useEffect(() => {
     async function load() {
       // Determine which endpoint to use based on user role
-      const url = isAdminView ? '/api/grades/all' : '/api/grades/me';
+      const url = isAdminView ? '/grades/all' : '/grades/me';
       try {
         const res = await api.get(url);
         setGrades(Array.isArray(res.data) ? res.data : []);
