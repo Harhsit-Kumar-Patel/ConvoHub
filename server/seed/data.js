@@ -15,22 +15,22 @@ import Grade from '../src/models/Grade.js';
 // --- EDUCATIONAL DATA ---
 export const educationalUsers = [
   // Test users for each role
-  { name: 'Student User', email: 'student@edu.com', role: 'student', workspaceType: 'educational', program: 'Computer Science', batch: '2025' },
-  { name: 'TA User', email: 'ta@edu.com', role: 'ta', workspaceType: 'educational', program: 'Computer Science', batch: '2025' },
-  { name: 'Instructor User', email: 'instructor@edu.com', role: 'instructor', workspaceType: 'educational', program: 'Computer Science' },
-  { name: 'Coordinator User', email: 'coordinator@edu.com', role: 'coordinator', workspaceType: 'educational' },
-  { name: 'Principal User', email: 'principal@edu.com', role: 'principal', workspaceType: 'educational' },
-  { name: 'Admin User', email: 'admin@edu.com', role: 'admin', workspaceType: 'educational' },
+  { _id: new mongoose.Types.ObjectId(), name: 'Student User', email: 'student@edu.com', role: 'student', workspaceType: 'educational', program: 'Computer Science', batch: '2025' },
+  { _id: new mongoose.Types.ObjectId(), name: 'TA User', email: 'ta@edu.com', role: 'ta', workspaceType: 'educational', program: 'Computer Science', batch: '2025' },
+  { _id: new mongoose.Types.ObjectId(), name: 'Instructor User', email: 'instructor@edu.com', role: 'instructor', workspaceType: 'educational', program: 'Computer Science' },
+  { _id: new mongoose.Types.ObjectId(), name: 'Coordinator User', email: 'coordinator@edu.com', role: 'coordinator', workspaceType: 'educational' },
+  { _id: new mongoose.Types.ObjectId(), name: 'Principal User', email: 'principal@edu.com', role: 'principal', workspaceType: 'educational' },
+  { _id: new mongoose.Types.ObjectId(), name: 'Admin User', email: 'admin@edu.com', role: 'admin', workspaceType: 'educational' },
 ];
 
 // --- PROFESSIONAL DATA ---
 export const professionalUsers = [
    // Test users for each role
-  { name: 'Member User', email: 'member@work.com', role: 'member', workspaceType: 'professional', skills: ['Team Collaboration'] },
-  { name: 'Lead User', email: 'lead@work.com', role: 'lead', workspaceType: 'professional', skills: ['Agile', 'Task Management'] },
-  { name: 'Manager User', email: 'manager@work.com', role: 'manager', workspaceType: 'professional', skills: ['Project Planning', 'Budgeting'] },
-  { name: 'Org Admin User', email: 'orgadmin@work.com', role: 'org_admin', workspaceType: 'professional', skills: ['Administration'] },
-  { name: 'Admin User', email: 'admin@work.com', role: 'admin', workspaceType: 'professional' },
+  { _id: new mongoose.Types.ObjectId(), name: 'Member User', email: 'member@work.com', role: 'member', workspaceType: 'professional', skills: ['Team Collaboration'] },
+  { _id: new mongoose.Types.ObjectId(), name: 'Lead User', email: 'lead@work.com', role: 'lead', workspaceType: 'professional', skills: ['Agile', 'Task Management'] },
+  { _id: new mongoose.Types.ObjectId(), name: 'Manager User', email: 'manager@work.com', role: 'manager', workspaceType: 'professional', skills: ['Project Planning', 'Budgeting'] },
+  { _id: new mongoose.Types.ObjectId(), name: 'Org Admin User', email: 'orgadmin@work.com', role: 'org_admin', workspaceType: 'professional', skills: ['Administration'] },
+  { _id: new mongoose.Types.ObjectId(), name: 'Admin User', email: 'admin@work.com', role: 'admin', workspaceType: 'professional' },
 ];
 
 
@@ -88,7 +88,14 @@ export const assignments = [
 
 export const teams = [
     { name: 'Marketing (India)', description: 'Pan-India marketing campaigns across Tier-1 & Tier-2 cities.'},
-    { name: 'Frontend Engineering', description: 'Building multilingual UI components (English/Hindi).' },
+    { 
+      name: 'Frontend Engineering', 
+      description: 'Building multilingual UI components (English/Hindi).',
+      members: [
+        professionalUsers.find(u => u.email === 'lead@work.com')._id,
+        professionalUsers.find(u => u.email === 'member@work.com')._id
+      ]
+    },
 ];
 
 export const projects = [
@@ -96,8 +103,8 @@ export const projects = [
     name: 'Diwali 2025 Campaign',
     description: 'Integrated festive campaign for North & West India with OTT + Outdoor.',
     tasks: [
-      { title: 'Finalize Hindi/English ad copies', status: 'in-progress' },
-      { title: 'City-wise outdoor plans (Mumbai/Delhi)', status: 'done' },
+      { title: 'Finalize Hindi/English ad copies', status: 'in-progress', assignee: professionalUsers.find(u => u.email === 'member@work.com')._id },
+      { title: 'City-wise outdoor plans (Mumbai/Delhi)', status: 'done', assignee: professionalUsers.find(u => u.email === 'lead@work.com')._id },
     ]
   },
   {
@@ -105,7 +112,8 @@ export const projects = [
     description: 'Add i18n with Hindi and regional languages for Indian market.',
     tasks: [
       { title: 'Create wireframes', status: 'done' },
-      { title: 'Add i18n keys for product pages', status: 'in-progress' },
+      { title: 'Add i18n keys for product pages', status: 'in-progress', assignee: professionalUsers.find(u => u.email === 'member@work.com')._id },
+      { title: 'Setup translation library', status: 'todo', assignee: professionalUsers.find(u => u.email === 'member@work.com')._id },
     ]
   },
 ];

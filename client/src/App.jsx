@@ -36,6 +36,8 @@ import ProjectBoard from './pages/professional/ProjectBoard.jsx';
 import TeamChat from './pages/professional/TeamChat.jsx';
 import ExploreTeams from './pages/professional/ExploreTeams.jsx';
 import Directory from './pages/professional/Directory.jsx';
+import MyTasks from './pages/professional/MyTasks.jsx';
+import TeamPerformance from './pages/professional/TeamPerformance.jsx';
 
 import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
 
@@ -105,9 +107,11 @@ export default function App() {
               <>
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:id" element={<ProjectBoard />} />
+                <Route path="/my-tasks" element={<MyTasks />} />
                 <Route path="/teams" element={<TeamChat />} />
                 <Route path="/explore-teams" element={<ExploreTeams />} />
                 <Route path="/directory" element={<Directory />} />
+                <Route path="/team-performance" element={<RoleGuard min="lead"><TeamPerformance /></RoleGuard>} />
               </>
             ) : (
               <>

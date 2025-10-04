@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Team from '../models/Team.js';
-import { auth } from '../middleware/auth.js';
+import Project from '../models/Project.js';
+import { auth, authorize } from '../middleware/auth.js';
 import mongoose from 'mongoose';
 
 const router = Router();
@@ -23,6 +24,76 @@ router.get('/all', auth(true), async (req, res) => {
     res.json(items);
   } catch (e) {
     res.status(500).json({ message: 'Failed to fetch all teams' });
+  }
+});
+
+// GET /api/teams/:teamId/performance - Get performance metrics for a team
+router.get('/:teamId/performance', auth(true), authorize({ min: 'lead', workspaceOnly: 'professional' }), async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const team = await Team.findById(teamId).populate('members', 'name').lean();
+
+    if (!team) {
+      return res.status(404).json({ message: 'Team not found' });
+    }
+
+    const memberIds = team.members.map(m => m._id);
+
+    const taskStats = await Project.aggregate([
+      { $unwind: '$tasks' },
+      { $match: { 'tasks.assignee': { $in: memberIds } } },
+      {
+        $group: {
+          _id: {
+            assigneeId: '$tasks.assignee',
+            status: '$tasks.status',
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.assigneeId',
+          tasksByStatus: {
+            $push: {
+              status: '$_id.status',
+              count: '$count',
+            },
+          },
+        },
+      },
+    ]);
+
+    const performanceData = team.members.map(member => {
+      const stats = taskStats.find(stat => stat._id.equals(member._id));
+      const taskCounts = {
+        todo: 0,
+        'in-progress': 0,
+        done: 0,
+      };
+
+      if (stats) {
+        stats.tasksByStatus.forEach(item => {
+          if (taskCounts.hasOwnProperty(item.status)) {
+            taskCounts[item.status] = item.count;
+          }
+        });
+      }
+      
+      const totalTasks = taskCounts.todo + taskCounts['in-progress'] + taskCounts.done;
+
+      return {
+        memberId: member._id,
+        memberName: member.name,
+        taskCounts,
+        totalTasks,
+      };
+    });
+
+    res.json(performanceData);
+  } catch (e) {
+    console.error('Failed to get team performance', e);
+    res.status(500).json({ message: 'Failed to retrieve team performance data' });
   }
 });
 

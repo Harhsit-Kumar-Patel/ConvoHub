@@ -25,8 +25,10 @@ const educationalLinks = [
 const professionalLinks = [
   { to: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
   { to: '/projects', label: 'Projects', icon: Icons.chat },
+  { to: '/my-tasks', label: 'My Tasks', icon: Icons.profile },
   { to: '/teams', label: 'Team Chat', icon: Icons.chat },
   { to: '/explore-teams', label: 'Explore Teams', icon: Icons.chat },
+  { to: '/team-performance', label: 'Team Performance', icon: Icons.dashboard, minRole: 'lead' },
   { to: '/notices', label: 'Notices', icon: Icons.notice },
   { to: '/directory', label: 'Directory', icon: Icons.profile },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
@@ -110,5 +112,3 @@ export default function Sidebar({ isMobileOpen = false, onMobileClose = () => { 
     </>
   );
 }
-
-
