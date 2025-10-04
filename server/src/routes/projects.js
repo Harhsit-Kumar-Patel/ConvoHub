@@ -45,6 +45,79 @@ router.get('/my-tasks', auth(true), authorize({ workspaceOnly: 'professional' })
   }
 });
 
+// GET /api/projects/portfolio - Get a high-level overview of all projects
+router.get('/portfolio', auth(true), authorize({ min: 'manager', workspaceOnly: 'professional' }), async (req, res) => {
+  try {
+    const portfolioData = await Project.aggregate([
+      { $unwind: { path: '$tasks', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: {
+            projectId: '$_id',
+            status: '$tasks.status',
+          },
+          taskCount: { $sum: { $cond: [{ $ifNull: ["$tasks._id", false] }, 1, 0] } },
+        },
+      },
+      {
+        $group: {
+          _id: '$_id.projectId',
+          statusCounts: {
+            $push: {
+              status: '$_id.status',
+              count: '$taskCount',
+            },
+          },
+          totalTasks: { $sum: '$taskCount' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'projects',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'projectDetails',
+        },
+      },
+      { $unwind: '$projectDetails' },
+      {
+        $project: {
+          _id: 1,
+          name: '$projectDetails.name',
+          description: '$projectDetails.description',
+          totalTasks: 1,
+          statusCounts: 1,
+          createdAt: '$projectDetails.createdAt',
+        },
+      },
+      { $sort: { createdAt: -1 } },
+    ]);
+
+    const results = portfolioData.map(p => {
+      const counts = {
+        todo: 0,
+        'in-progress': 0,
+        done: 0,
+      };
+      p.statusCounts.forEach(item => {
+        if (counts.hasOwnProperty(item.status)) {
+          counts[item.status] = item.count;
+        }
+      });
+      const progress = p.totalTasks > 0 ? Math.round((counts.done / p.totalTasks) * 100) : 0;
+      return {
+        ...p,
+        taskCounts: counts,
+        progress,
+      };
+    });
+
+    res.json(results);
+  } catch (e) {
+    console.error('Failed to get project portfolio', e);
+    res.status(500).json({ message: 'Failed to retrieve project portfolio' });
+  }
+});
 
 // POST /api/projects - Create a new project (professional: lead+)
 router.post('/', auth(true), authorize({ min: 'lead', workspaceOnly: 'professional' }), async (req, res) => {

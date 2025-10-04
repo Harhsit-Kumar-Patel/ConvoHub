@@ -29,10 +29,12 @@ const professionalLinks = [
   { to: '/teams', label: 'Team Chat', icon: Icons.chat },
   { to: '/explore-teams', label: 'Explore Teams', icon: Icons.chat },
   { to: '/team-performance', label: 'Team Performance', icon: Icons.dashboard, minRole: 'lead' },
+  { to: '/portfolio', label: 'Project Portfolio', icon: Icons.dashboard, minRole: 'manager' },
   { to: '/notices', label: 'Notices', icon: Icons.notice },
   { to: '/directory', label: 'Directory', icon: Icons.profile },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
+  { to: '/user-management', label: 'User Management', icon: Icons.profile, minRole: 'org_admin' },
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];
 

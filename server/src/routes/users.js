@@ -1,8 +1,18 @@
 import { Router } from 'express';
 import User from '../models/User.js';
-import { auth, authorize } from '../middleware/auth.js';
+import { auth } from '../middleware/auth.js';
 
 const router = Router();
+
+// A helper to check for admin privileges in either workspace
+const hasAdminPrivileges = (user) => {
+    if (!user) return false;
+    const { role, workspaceType } = user;
+    if (role === 'admin') return true;
+    if (workspaceType === 'educational' && ['principal', 'admin'].includes(role)) return true;
+    if (workspaceType === 'professional' && ['org_admin', 'admin'].includes(role)) return true;
+    return false;
+};
 
 // GET /api/users/search?q=term
 router.get('/search', auth(true), async (req, res) => {
@@ -16,9 +26,11 @@ router.get('/search', auth(true), async (req, res) => {
   res.json(items);
 });
 
-// --- NEW ---
-// GET /api/users/manage - Get all users for management (Principal+)
-router.get('/manage', auth(true), authorize({ min: 'principal' }), async (req, res) => {
+// GET /api/users/manage - Get all users for management
+router.get('/manage', auth(true), async (req, res) => {
+  if (!hasAdminPrivileges(req.user)) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const users = await User.find().select('-passwordHash').sort({ name: 1 }).lean();
     res.json(users);
@@ -27,9 +39,11 @@ router.get('/manage', auth(true), authorize({ min: 'principal' }), async (req, r
   }
 });
 
-// --- NEW ---
-// PUT /api/users/manage/:id - Update a user's role/details (Principal+)
-router.put('/manage/:id', auth(true), authorize({ min: 'principal' }), async (req, res) => {
+// PUT /api/users/manage/:id - Update a user's role/details
+router.put('/manage/:id', auth(true), async (req, res) => {
+  if (!hasAdminPrivileges(req.user)) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const { name, email, role } = req.body;
     const userToUpdate = await User.findById(req.params.id);
@@ -38,7 +52,6 @@ router.put('/manage/:id', auth(true), authorize({ min: 'principal' }), async (re
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Prevent a principal from demoting the only admin
     if (userToUpdate.role === 'admin' && role !== 'admin') {
       const adminCount = await User.countDocuments({ role: 'admin' });
       if (adminCount <= 1) {
@@ -52,7 +65,6 @@ router.put('/manage/:id', auth(true), authorize({ min: 'principal' }), async (re
     
     await userToUpdate.save();
     
-    // Return user without password hash
     const updatedUser = userToUpdate.toObject();
     delete updatedUser.passwordHash;
 
@@ -62,16 +74,17 @@ router.put('/manage/:id', auth(true), authorize({ min: 'principal' }), async (re
   }
 });
 
-// --- NEW ---
-// DELETE /api/users/manage/:id - Delete a user (Principal+)
-router.delete('/manage/:id', auth(true), authorize({ min: 'principal' }), async (req, res) => {
+// DELETE /api/users/manage/:id - Delete a user
+router.delete('/manage/:id', auth(true), async (req, res) => {
+  if (!hasAdminPrivileges(req.user)) {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
   try {
     const userToDelete = await User.findById(req.params.id);
     if (!userToDelete) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Prevent self-deletion and deletion of admins
     if (userToDelete._id.toString() === req.user.id) {
         return res.status(400).json({ message: 'You cannot delete your own account.' });
     }

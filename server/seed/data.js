@@ -87,13 +87,22 @@ export const assignments = [
 ];
 
 export const teams = [
-    { name: 'Marketing (India)', description: 'Pan-India marketing campaigns across Tier-1 & Tier-2 cities.'},
+    { 
+        name: 'Marketing (India)', 
+        description: 'Pan-India marketing campaigns across Tier-1 & Tier-2 cities.',
+        members: [
+            professionalUsers.find(u => u.email === 'manager@work.com')._id,
+            professionalUsers.find(u => u.email === 'orgadmin@work.com')._id,
+        ]
+    },
     { 
       name: 'Frontend Engineering', 
       description: 'Building multilingual UI components (English/Hindi).',
       members: [
         professionalUsers.find(u => u.email === 'lead@work.com')._id,
-        professionalUsers.find(u => u.email === 'member@work.com')._id
+        professionalUsers.find(u => u.email === 'member@work.com')._id,
+        professionalUsers.find(u => u.email === 'manager@work.com')._id,
+        professionalUsers.find(u => u.email === 'orgadmin@work.com')._id,
       ]
     },
 ];
@@ -102,6 +111,10 @@ export const projects = [
   {
     name: 'Diwali 2025 Campaign',
     description: 'Integrated festive campaign for North & West India with OTT + Outdoor.',
+    members: [
+        professionalUsers.find(u => u.email === 'manager@work.com')._id,
+        professionalUsers.find(u => u.email === 'orgadmin@work.com')._id,
+    ],
     tasks: [
       { title: 'Finalize Hindi/English ad copies', status: 'in-progress', assignee: professionalUsers.find(u => u.email === 'member@work.com')._id },
       { title: 'City-wise outdoor plans (Mumbai/Delhi)', status: 'done', assignee: professionalUsers.find(u => u.email === 'lead@work.com')._id },
@@ -110,6 +123,12 @@ export const projects = [
   {
     name: 'Website Internationalization',
     description: 'Add i18n with Hindi and regional languages for Indian market.',
+    members: [
+        professionalUsers.find(u => u.email === 'lead@work.com')._id,
+        professionalUsers.find(u => u.email === 'member@work.com')._id,
+        professionalUsers.find(u => u.email === 'manager@work.com')._id,
+        professionalUsers.find(u => u.email === 'orgadmin@work.com')._id,
+    ],
     tasks: [
       { title: 'Create wireframes', status: 'done' },
       { title: 'Add i18n keys for product pages', status: 'in-progress', assignee: professionalUsers.find(u => u.email === 'member@work.com')._id },

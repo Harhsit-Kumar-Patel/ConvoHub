@@ -38,6 +38,8 @@ import ExploreTeams from './pages/professional/ExploreTeams.jsx';
 import Directory from './pages/professional/Directory.jsx';
 import MyTasks from './pages/professional/MyTasks.jsx';
 import TeamPerformance from './pages/professional/TeamPerformance.jsx';
+import ProjectPortfolio from './pages/professional/ProjectPortfolio.jsx';
+import ProfessionalUserManagement from './pages/professional/UserManagement.jsx';
 
 import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
 
@@ -112,6 +114,8 @@ export default function App() {
                 <Route path="/explore-teams" element={<ExploreTeams />} />
                 <Route path="/directory" element={<Directory />} />
                 <Route path="/team-performance" element={<RoleGuard min="lead"><TeamPerformance /></RoleGuard>} />
+                <Route path="/portfolio" element={<RoleGuard min="manager"><ProjectPortfolio /></RoleGuard>} />
+                <Route path="/user-management" element={<RoleGuard min="org_admin"><ProfessionalUserManagement /></RoleGuard>} />
               </>
             ) : (
               <>
