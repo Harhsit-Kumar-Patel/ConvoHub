@@ -31,6 +31,7 @@ import ViewComplaints from './pages/educational/ViewComplaints.jsx';
 import MyCalendar from './pages/educational/MyCalendar.jsx';
 import Grading from './pages/educational/Grading.jsx';
 import ManageCourse from './pages/educational/ManageCourse.jsx';
+import AnalyticsDashboard from './pages/educational/AnalyticsDashboard.jsx'; // --- NEW ---
 
 // Professional pages
 import Projects from './pages/professional/Projects.jsx';
@@ -127,6 +128,7 @@ export default function App() {
                 <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
                 <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
                 <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
+                <Route path="/analytics" element={<RoleGuard min="coordinator"><AnalyticsDashboard /></RoleGuard>} /> {/* --- NEW --- */}
                 <Route path="/grading/assignment/:id" element={<RoleGuard min="instructor"><Grading /></RoleGuard>} />
                 <Route path="/courses/:id/gradebook" element={<RoleGuard min="instructor"><Gradebook /></RoleGuard>} />
                 <Route path="/courses/:id/manage" element={<RoleGuard min="instructor"><ManageCourse /></RoleGuard>} />

@@ -8,7 +8,7 @@ const educationalLinks = [
   { to: '/courses', label: 'Courses', icon: Icons.notice },
   { to: '/create-course', label: 'Create Course', icon: Icons.notice, minRole: 'instructor' },
   { to: '/notices', label: 'Announcements', icon: Icons.notice },
-  { to: '/create-notice', label: 'Post Notice', icon: Icons.notice, minRole: 'instructor' }, // Add this
+  { to: '/create-notice', label: 'Post Notice', icon: Icons.notice, minRole: 'instructor' },
   { to: '/assignments', label: 'Assignments', icon: Icons.notice },
   { to: '/calendar', label: 'My Calendar', icon: Icons.calendar },
   { to: '/create-assignment', label: 'Create Assignment', icon: Icons.notice, minRole: 'instructor' },
@@ -16,6 +16,7 @@ const educationalLinks = [
   { to: '/chat', label: 'Cohort Chat', icon: Icons.chat },
   { to: '/direct', label: 'Direct Messages', icon: Icons.dm },
   { to: '/complaints', label: 'Complaint Box', icon: Icons.dm },
+  { to: '/analytics', label: 'Analytics', icon: Icons.dashboard, minRole: 'coordinator' }, // --- NEW ---
   { to: '/view-complaints', label: 'View Complaints', icon: Icons.dm, minRole: 'coordinator' },
   { to: '/profile', label: 'Profile', icon: Icons.profile },
 ];

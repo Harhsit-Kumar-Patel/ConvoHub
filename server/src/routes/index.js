@@ -10,6 +10,7 @@ import projectsRouter from './projects.js';
 import teamsRouter from './teams.js';
 import coursesRouter from './courses.js';
 import gradesRouter from './grades.js';
+import analyticsRouter from './analytics.js'; // --- NEW ---
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/projects', projectsRouter);
 router.use('/teams', teamsRouter);
 router.use('/courses', coursesRouter);
 router.use('/grades', gradesRouter);
+router.use('/analytics', analyticsRouter); // --- NEW ---
 
 export default router;
