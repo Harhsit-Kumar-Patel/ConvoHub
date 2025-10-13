@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import Message from '../models/Message.js';
+import Notification from '../models/Notification.js'; // --- NEW ---
 import { auth } from '../middleware/auth.js';
 
 const router = Router();
@@ -45,6 +46,27 @@ router.post('/', auth(true), async (req, res) => {
     const io = req.app.get('io');
     const populatedDoc = await doc.populate('from', 'name');
 
+    if (toUser) {
+      // --- NEW: Create and emit notification for DM ---
+      const notification = await Notification.create({
+        user: toUser,
+        title: `New message from ${req.user.name}`,
+        body: String(body),
+        type: 'message',
+        link: '/direct',
+      });
+      io.of('/chat').to(`user:${toUser}`).emit('notification', notification);
+      // --- END NEW ---
+
+      io.of('/chat').to(`user:${toUser}`).emit('directMessage', {
+        message: populatedDoc,
+      });
+      // echo to sender thread as well
+      io.of('/chat').to(`user:${req.user.id}`).emit('directMessage', {
+        message: populatedDoc,
+      });
+    }
+
     if (cohortId) {
       io.of('/chat').to(`cohort:${cohortId}`).emit('cohortMessage', {
         message: populatedDoc,
@@ -55,15 +77,6 @@ router.post('/', auth(true), async (req, res) => {
       io.of('/chat').to(`team:${teamId}`).emit('teamMessage', {
         message: populatedDoc,
         teamId,
-      });
-    }
-    if (toUser) {
-      io.of('/chat').to(`user:${toUser}`).emit('directMessage', {
-        message: populatedDoc,
-      });
-      // echo to sender thread as well
-      io.of('/chat').to(`user:${req.user.id}`).emit('directMessage', {
-        message: populatedDoc,
       });
     }
 

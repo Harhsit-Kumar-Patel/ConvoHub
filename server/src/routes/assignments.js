@@ -4,6 +4,7 @@ import Course from '../models/Course.js';
 import Grade from '../models/Grade.js'; // Import the Grade model
 import { auth, authorize } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
+import Notification from '../models/Notification.js'; // --- NEW ---
 
 const router = Router();
 
@@ -155,6 +156,18 @@ router.post(
         },
         { upsert: true, new: true }
       );
+
+      // --- NEW: Create and emit notification for graded assignment ---
+      const notification = await Notification.create({
+        user: submission.student,
+        title: `Graded: ${assignment.title}`,
+        body: `You received a grade of ${grade}.`,
+        type: 'grade',
+        link: `/assignments/${assignmentId}`,
+      });
+      const io = req.app.get('io');
+      io.of('/chat').to(`user:${submission.student}`).emit('notification', notification);
+      // --- END NEW ---
 
       res.json(submission);
     } catch (e) {

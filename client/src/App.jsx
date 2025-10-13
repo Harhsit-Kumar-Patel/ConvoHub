@@ -42,6 +42,7 @@ import ProjectPortfolio from './pages/professional/ProjectPortfolio.jsx';
 import ProfessionalUserManagement from './pages/professional/UserManagement.jsx';
 
 import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
+import { NotificationProvider } from './components/NotificationProvider.jsx'; // --- NEW ---
 
 
 // Main layout component for authenticated users
@@ -93,54 +94,56 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        
-        <Route element={<ProtectedRoute />}>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/direct" element={<Direct />} />
-            <Route path="/complaints" element={<Complaints />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/notices" element={<Notices />} />
+      <NotificationProvider> {/* --- NEW --- */}
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
 
-            {isProfessional ? (
-              <>
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/projects/:id" element={<ProjectBoard />} />
-                <Route path="/my-tasks" element={<MyTasks />} />
-                <Route path="/teams" element={<TeamChat />} />
-                <Route path="/explore-teams" element={<ExploreTeams />} />
-                <Route path="/directory" element={<Directory />} />
-                <Route path="/team-performance" element={<RoleGuard min="lead"><TeamPerformance /></RoleGuard>} />
-                <Route path="/portfolio" element={<RoleGuard min="manager"><ProjectPortfolio /></RoleGuard>} />
-                <Route path="/user-management" element={<RoleGuard min="org_admin"><ProfessionalUserManagement /></RoleGuard>} />
-              </>
-            ) : (
-              <>
-                <Route path="/assignments" element={<Assignments />} />
-                <Route path="/assignments/:id" element={<AssignmentDetail />} />
-                <Route path="/chat" element={<CohortChat />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/courses/:id" element={<CourseDetail />} />
-                <Route path="/grades" element={<Grades />} />
-                <Route path="/calendar" element={<MyCalendar />} />
-                
-                <Route path="/create-assignment" element={<RoleGuard min="instructor"><CreateAssignment /></RoleGuard>} />
-                <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
-                <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
-                <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
-                <Route path="/analytics" element={<RoleGuard min="coordinator"><AnalyticsDashboard /></RoleGuard>} />
-                <Route path="/user-management" element={<RoleGuard min="principal"><UserManagement /></RoleGuard>} />
-                <Route path="/grading/assignment/:id" element={<RoleGuard min="instructor"><Grading /></RoleGuard>} />
-                <Route path="/courses/:id/gradebook" element={<RoleGuard min="instructor"><Gradebook /></RoleGuard>} />
-                <Route path="/courses/:id/manage" element={<RoleGuard min="instructor"><ManageCourse /></RoleGuard>} />
-              </>
-            )}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/direct" element={<Direct />} />
+              <Route path="/complaints" element={<Complaints />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/notices" element={<Notices />} />
+
+              {isProfessional ? (
+                <>
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/projects/:id" element={<ProjectBoard />} />
+                  <Route path="/my-tasks" element={<MyTasks />} />
+                  <Route path="/teams" element={<TeamChat />} />
+                  <Route path="/explore-teams" element={<ExploreTeams />} />
+                  <Route path="/directory" element={<Directory />} />
+                  <Route path="/team-performance" element={<RoleGuard min="lead"><TeamPerformance /></RoleGuard>} />
+                  <Route path="/portfolio" element={<RoleGuard min="manager"><ProjectPortfolio /></RoleGuard>} />
+                  <Route path="/user-management" element={<RoleGuard min="org_admin"><ProfessionalUserManagement /></RoleGuard>} />
+                </>
+              ) : (
+                <>
+                  <Route path="/assignments" element={<Assignments />} />
+                  <Route path="/assignments/:id" element={<AssignmentDetail />} />
+                  <Route path="/chat" element={<CohortChat />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/courses/:id" element={<CourseDetail />} />
+                  <Route path="/grades" element={<Grades />} />
+                  <Route path="/calendar" element={<MyCalendar />} />
+
+                  <Route path="/create-assignment" element={<RoleGuard min="instructor"><CreateAssignment /></RoleGuard>} />
+                  <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
+                  <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
+                  <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
+                  <Route path="/analytics" element={<RoleGuard min="coordinator"><AnalyticsDashboard /></RoleGuard>} />
+                  <Route path="/user-management" element={<RoleGuard min="principal"><UserManagement /></RoleGuard>} />
+                  <Route path="/grading/assignment/:id" element={<RoleGuard min="instructor"><Grading /></RoleGuard>} />
+                  <Route path="/courses/:id/gradebook" element={<RoleGuard min="instructor"><Gradebook /></RoleGuard>} />
+                  <Route path="/courses/:id/manage" element={<RoleGuard min="instructor"><ManageCourse /></RoleGuard>} />
+                </>
+              )}
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </NotificationProvider> {/* --- NEW --- */}
       <ToastViewport />
     </ToastProvider>
   );

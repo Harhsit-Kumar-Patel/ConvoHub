@@ -3,6 +3,7 @@ import ThemeToggle from '@/components/ThemeToggle.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.jsx';
 import SettingsModal from '@/components/SettingsModal.jsx';
+import NotificationBell from '@/components/NotificationBell.jsx'; // --- NEW ---
 import { getUser } from '@/lib/auth.js';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip.jsx';
 
@@ -24,6 +25,16 @@ export default function Header({ onOpenMobileSidebar }) {
         {/* Actions */}
         <div className="flex items-center gap-2">
           <TooltipProvider>
+            {/* --- NEW: NotificationBell --- */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <NotificationBell />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>Notifications</TooltipContent>
+            </Tooltip>
+            {/* --- END NEW --- */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
