@@ -16,20 +16,33 @@ export default function Direct() {
 
   const socket = useMemo(() => getSocket(), []);
 
+  // UPDATED: Corrected socket handler to display sent messages in real-time
   useEffect(() => {
-    const onDM = (msg) => {
-      if (toUser && msg?.from && (msg.from._id === toUser._id || msg.from._id === toUser.id)) {
-        setMessages((m) => [...m, { body: msg.message, createdAt: msg.at, from: msg.from }]);
+    const onDM = (payload) => {
+      const message = payload.message; // The actual message object
+      if (!toUser || !message || !message.from) return;
+
+      // The active conversation is between 'me' and 'toUser'
+      // Check if the incoming message is part of this conversation
+      const isFromCurrentUser = message.from._id === me.id;
+      const isToCurrentUser = message.toUser === me.id;
+      const isFromPeer = message.from._id === toUser._id;
+      const isToPeer = message.toUser === toUser._id;
+
+      // Add to state if (I sent it to the peer) OR (the peer sent it to me)
+      if ((isFromCurrentUser && isToPeer) || (isFromPeer && isToCurrentUser)) {
+        setMessages((prevMessages) => [...prevMessages, message]);
       }
     };
+
     socket.on('directMessage', onDM);
     return () => socket.off('directMessage', onDM);
-  }, [socket, toUser]);
+  }, [socket, toUser, me]);
 
   async function search() {
     if (!query.trim()) return;
     const res = await api.get('/users/search', { params: { q: query } });
-    setResults((res.data || []).filter(u => u._id !== me._id));
+    setResults((res.data || []).filter(u => u._id !== me.id));
   }
 
   async function openThread(user) {
@@ -40,6 +53,7 @@ export default function Direct() {
 
   async function send() {
     if (!input.trim() || !toUser) return;
+    // The backend will echo the message via socket, which the useEffect handler will catch.
     await api.post('/messages', { body: input, toUser: toUser._id });
     setInput('');
   }
@@ -83,10 +97,10 @@ export default function Direct() {
 
               <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
                 {messages.map((m, i) => {
-                  const isMe = me?._id && (m.from?._id === me._id);
+                  const isMe = me?.id && (m.from?._id === me.id);
                   const time = new Date(m.createdAt || m.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                   return (
-                    <div key={i} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                    <div key={m._id || i} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-[75%] rounded-lg px-3 py-2 text-sm shadow-sm ${isMe ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                         <p className="whitespace-pre-wrap">{m.body}</p>
                         <div className={`text-xs mt-1 ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>{time}</div>
