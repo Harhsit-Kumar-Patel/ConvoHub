@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '@/lib/api';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Icons } from './Icons';
+import { getUser } from '@/lib/auth';
 
 // Debounce hook to delay API calls
 function useDebounce(value, delay) {
@@ -40,10 +41,40 @@ export default function GlobalSearch() {
   const [loading, setLoading] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
   const navigate = useNavigate();
+  const user = getUser();
+  const isProfessional = user?.workspaceType === 'professional';
+
+  // --- NEW: Define static navigation links ---
+  const baseNavLinks = [
+    { title: 'Dashboard', to: '/dashboard', icon: <Icons.dashboard className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Announcements', to: '/notices', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Direct Messages', to: '/direct', icon: <Icons.dm className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Profile', to: '/profile', icon: <Icons.profile className="h-4 w-4 text-muted-foreground" /> },
+  ];
+
+  const educationalNavLinks = [
+    ...baseNavLinks,
+    { title: 'Courses', to: '/courses', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Assignments', to: '/assignments', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'My Calendar', to: '/calendar', icon: <Icons.calendar className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Grades', to: '/grades', icon: <Icons.chat className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Cohort Chat', to: '/chat', icon: <Icons.chat className="h-4 w-4 text-muted-foreground" /> },
+  ];
+
+  const professionalNavLinks = [
+    ...baseNavLinks,
+    { title: 'Projects', to: '/projects', icon: <Icons.chat className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'My Tasks', to: '/my-tasks', icon: <Icons.profile className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Team Chat', to: '/teams', icon: <Icons.chat className="h-4 w-4 text-muted-foreground" /> },
+    { title: 'Directory', to: '/directory', icon: <Icons.profile className="h-4 w-4 text-muted-foreground" /> },
+  ];
+
+  const navLinks = isProfessional ? professionalNavLinks : educationalNavLinks;
 
   useEffect(() => {
     if (!debouncedQuery) {
       setResults(null);
+      setLoading(false);
       return;
     }
 
@@ -76,6 +107,9 @@ export default function GlobalSearch() {
     { key: 'projects', title: 'Projects', icon: <Icons.chat className="h-4 w-4 text-muted-foreground" />, path: (item) => `/projects/${item._id}` },
     { key: 'notices', title: 'Notices', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" />, path: (item) => `/notices` },
   ];
+  
+  const filteredNavLinks = query ? navLinks.filter(link => link.title.toLowerCase().includes(query.toLowerCase())) : navLinks;
+  const hasDynamicResults = results && Object.values(results).some(arr => arr.length > 0);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -99,9 +133,27 @@ export default function GlobalSearch() {
         </div>
         <div className="max-h-[60vh] overflow-y-auto p-3">
           {loading && <p className="p-4 text-center text-sm text-muted-foreground">Searching...</p>}
-          {!loading && results && (
+          {!loading && (
             <div className="space-y-4">
-              {resultCategories.map(cat => (
+              {/* --- UPDATED: Show navigation links --- */}
+              {filteredNavLinks.length > 0 && (
+                <div>
+                  <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-muted-foreground">{query ? 'Navigate To' : 'Quick Actions'}</h3>
+                  <div className="space-y-1">
+                    {filteredNavLinks.map(item => (
+                      <SearchResultItem
+                        key={item.to}
+                        to={item.to}
+                        icon={item.icon}
+                        title={item.title}
+                        onSelect={handleSelect}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Show dynamic results */}
+              {results && resultCategories.map(cat => (
                 results[cat.key]?.length > 0 && (
                   <div key={cat.key}>
                     <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-muted-foreground">{cat.title}</h3>
@@ -120,7 +172,7 @@ export default function GlobalSearch() {
                   </div>
                 )
               ))}
-              {Object.values(results).every(arr => arr.length === 0) && (
+              {debouncedQuery && !hasDynamicResults && filteredNavLinks.length === 0 && (
                  <p className="p-8 text-center text-sm text-muted-foreground">No results found for "{debouncedQuery}"</p>
               )}
             </div>
