@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap');
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 @tailwind base;
 @tailwind components;
@@ -60,9 +61,8 @@
   }
 }
 
-/* --- NEW: CUSTOM SCROLLBAR STYLING --- */
 @layer components {
-  /* For Webkit browsers like Chrome, Safari, Edge */
+  /* --- CUSTOM SCROLLBAR STYLING --- */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -76,5 +76,81 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground));
+  }
+
+  /* --- react-big-calendar MODERN styles --- */
+  .rbc-calendar {
+    @apply h-full w-full text-foreground;
+  }
+  .rbc-toolbar, .rbc-agenda-view, .rbc-time-view, .rbc-month-view {
+    @apply border-none;
+  }
+  .rbc-header {
+    @apply border-b p-3 text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+  .rbc-month-view {
+    @apply border rounded-lg overflow-hidden;
+  }
+  .rbc-day-bg {
+    @apply border-l;
+  }
+  .rbc-day-bg:first-child {
+    @apply border-l-0;
+  }
+  .rbc-month-row {
+    @apply border-t min-h-[120px] flex;
+  }
+  .rbc-row-segment {
+    @apply p-1.5;
+  }
+  .rbc-date-cell {
+    @apply p-1.5 text-right;
+  }
+  .rbc-date-cell .rbc-button-link {
+    @apply h-7 w-7 rounded-full flex items-center justify-center ml-auto transition-all text-sm font-medium hover:bg-accent;
+  }
+  .rbc-off-range-bg {
+    @apply bg-muted/30;
+  }
+  .rbc-today {
+    @apply bg-transparent relative;
+  }
+  /* Today's Glow Effect */
+  .rbc-today .rbc-button-link {
+    @apply bg-primary text-primary-foreground rounded-full shadow-glow-primary transition-all scale-110;
+  }
+  .rbc-event {
+    @apply cursor-pointer rounded-lg p-0 overflow-hidden text-primary-foreground transition-all hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring;
+  }
+  .rbc-event[data-type="assignment"] {
+    @apply bg-gradient-to-br from-yellow-500 to-orange-500;
+  }
+  .rbc-event[data-type="event"] {
+    @apply bg-gradient-to-br from-blue-500 to-purple-500;
+  }
+  .rbc-event-content {
+    @apply text-white;
+  }
+  .rbc-show-more {
+    @apply text-primary text-xs hover:underline mt-1;
+  }
+  /* Time Grid Styles */
+  .rbc-time-view .rbc-row, .rbc-time-slot {
+      @apply min-h-[50px];
+  }
+  .rbc-time-header-content {
+      @apply border-l;
+  }
+  .rbc-time-header-content .rbc-header {
+      @apply border-b-0;
+  }
+  .rbc-time-content {
+      @apply border-t;
+  }
+  .rbc-time-gutter {
+      @apply text-xs pr-2 text-right text-muted-foreground;
+  }
+  .rbc-current-time-indicator {
+    @apply bg-destructive;
   }
 }

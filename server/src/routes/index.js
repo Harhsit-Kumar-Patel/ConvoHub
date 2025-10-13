@@ -11,7 +11,8 @@ import teamsRouter from './teams.js';
 import coursesRouter from './courses.js';
 import gradesRouter from './grades.js';
 import analyticsRouter from './analytics.js';
-import notificationsRouter from './notifications.js'; // --- NEW ---
+import notificationsRouter from './notifications.js';
+import calendarRouter from './calendar.js'; // --- NEW ---
 
 const router = Router();
 
@@ -29,6 +30,7 @@ router.use('/teams', teamsRouter);
 router.use('/courses', coursesRouter);
 router.use('/grades', gradesRouter);
 router.use('/analytics', analyticsRouter);
-router.use('/notifications', notificationsRouter); // --- NEW ---
+router.use('/notifications', notificationsRouter);
+router.use('/calendar', calendarRouter); // --- NEW ---
 
 export default router;

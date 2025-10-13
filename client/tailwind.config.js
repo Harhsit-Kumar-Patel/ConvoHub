@@ -65,12 +65,21 @@ export default {
           '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
           '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
           '100%': { transform: 'translate(0px, 0px) scale(1)' },
-        }
+        },
+        // --- NEW ---
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'blob': 'blob 7s infinite',
+        shimmer: 'shimmer 1.5s infinite', // --- NEW ---
+      },
+      boxShadow: {
+        'glow-primary': '0 0 15px hsl(var(--primary) / 0.5), 0 0 5px hsl(var(--primary) / 0.7)',
+        'glow-secondary': '0 0 15px hsl(var(--secondary) / 0.5), 0 0 5px hsl(var(--secondary) / 0.7)',
       },
     },
   },

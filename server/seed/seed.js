@@ -11,6 +11,7 @@ import Project from '../src/models/Project.js';
 import Team from '../src/models/Team.js';
 import Course from '../src/models/Course.js';
 import Grade from '../src/models/Grade.js';
+import Event from '../src/models/Event.js'; // --- NEW ---
 import { educationalUsers, professionalUsers, cohorts, notices, assignments, projects, courses, teams } from './data.js';
 
 async function run() {
@@ -27,6 +28,7 @@ async function run() {
     Team.deleteMany({}),
     Course.deleteMany({}),
     Grade.deleteMany({}),
+    Event.deleteMany({}), // --- NEW ---
   ]);
 
   console.log('Seeding data...');
