@@ -3,7 +3,8 @@ import ThemeToggle from '@/components/ThemeToggle.jsx';
 import { Button } from '@/components/ui/button.jsx';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar.jsx';
 import SettingsModal from '@/components/SettingsModal.jsx';
-import NotificationBell from '@/components/NotificationBell.jsx'; // --- NEW ---
+import NotificationBell from '@/components/NotificationBell.jsx';
+import GlobalSearch from '@/components/GlobalSearch.jsx'; // --- NEW ---
 import { getUser } from '@/lib/auth.js';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip.jsx';
 
@@ -19,13 +20,14 @@ export default function Header({ onOpenMobileSidebar }) {
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </Button>
 
-        {/* Search placeholder */}
-        <div className="flex-1" />
+        {/* --- UPDATED: Global Search component --- */}
+        <div className="flex-1">
+          <GlobalSearch />
+        </div>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
           <TooltipProvider>
-            {/* --- NEW: NotificationBell --- */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
@@ -34,7 +36,7 @@ export default function Header({ onOpenMobileSidebar }) {
               </TooltipTrigger>
               <TooltipContent>Notifications</TooltipContent>
             </Tooltip>
-            {/* --- END NEW --- */}
+            
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>

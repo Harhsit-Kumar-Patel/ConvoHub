@@ -12,11 +12,10 @@ import coursesRouter from './courses.js';
 import gradesRouter from './grades.js';
 import analyticsRouter from './analytics.js';
 import notificationsRouter from './notifications.js';
-import calendarRouter from './calendar.js'; // --- NEW ---
+import calendarRouter from './calendar.js';
+import searchRouter from './search.js'; // --- NEW ---
 
 const router = Router();
-
-// ... (health check route)
 
 router.use('/notices', noticesRouter);
 router.use('/auth', authRouter);
@@ -31,6 +30,7 @@ router.use('/courses', coursesRouter);
 router.use('/grades', gradesRouter);
 router.use('/analytics', analyticsRouter);
 router.use('/notifications', notificationsRouter);
-router.use('/calendar', calendarRouter); // --- NEW ---
+router.use('/calendar', calendarRouter);
+router.use('/search', searchRouter); // --- NEW ---
 
 export default router;
