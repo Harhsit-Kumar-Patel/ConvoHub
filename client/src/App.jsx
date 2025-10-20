@@ -18,6 +18,7 @@ import Notices from './pages/Notices.jsx';
 import Announcements from './pages/Announcements.jsx';
 import Courses from './pages/educational/Courses.jsx';
 import CourseDetail from './pages/educational/CourseDetail.jsx';
+import CreateCourse from './pages/educational/CreateCourse.jsx';
 import Gradebook from './pages/educational/Gradebook.jsx';
 import Grades from './pages/educational/Grades.jsx';
 import CohortChat from './pages/educational/CohortChat.jsx';
@@ -129,6 +130,7 @@ export default function App() {
                   <Route path="/calendar" element={<MyCalendar />} />
                   <Route path="/notices" element={<Notices />} />
 
+                  <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
                   <Route path="/create-assignment" element={<RoleGuard min="instructor"><CreateAssignment /></RoleGuard>} />
                   <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
                   <Route path="/analytics" element={<RoleGuard min="coordinator"><AnalyticsDashboard /></RoleGuard>} />

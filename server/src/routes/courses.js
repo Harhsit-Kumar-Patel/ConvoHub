@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import Course from '../models/Course.js';
-import Assignment from '../models/Assignment.js'; // Import Assignment
-import Grade from '../models/Grade.js'; // Import Grade
-import User from '../models/User.js'; // Import User
+import Assignment from '../models/Assignment.js';
+import Grade from '../models/Grade.js';
+import User from '../models/User.js';
 import { auth, authorize } from '../middleware/auth.js';
+import upload from '../middleware/upload.js';
 
 const router = Router();
 
@@ -54,7 +55,6 @@ router.get('/:id', auth(true), async (req, res) => {
   }
 });
 
-// --- NEW ---
 // PUT /api/courses/:id - Update a course (instructor+)
 router.put('/:id', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
   try {
@@ -73,7 +73,6 @@ router.put('/:id', auth(true), authorize({ min: 'instructor' }), async (req, res
   }
 });
 
-// --- NEW ---
 // POST /api/courses/:id/enroll - Enroll a student (instructor+)
 router.post('/:id/enroll', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
     try {
@@ -96,7 +95,6 @@ router.post('/:id/enroll', auth(true), authorize({ min: 'instructor' }), async (
     }
 });
 
-// --- NEW ---
 // DELETE /api/courses/:id/students/:studentId - Remove a student from a course (instructor+)
 router.delete('/:id/students/:studentId', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
     try {
@@ -111,6 +109,45 @@ router.delete('/:id/students/:studentId', auth(true), authorize({ min: 'instruct
     }
 });
 
+// POST /api/courses/:id/materials - Add course material
+router.post('/:id/materials', auth(true), authorize({ min: 'instructor' }), upload, async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const { name } = req.body;
+    const file = req.file;
+
+    if (!name || !file) {
+      return res.status(400).json({ message: 'Name and file are required.' });
+    }
+
+    course.materials.push({
+      name,
+      url: `/uploads/${file.filename}`,
+      fileType: file.mimetype,
+    });
+
+    await course.save();
+    res.status(201).json(course);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to upload material' });
+  }
+});
+
+// DELETE /api/courses/:id/materials/:materialId - Delete course material
+router.delete('/:id/materials/:materialId', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    course.materials.pull({ _id: req.params.materialId });
+    await course.save();
+    res.status(200).json(course);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to delete material' });
+  }
+});
 
 // GET /api/courses/:id/gradebook - Get structured data for a course gradebook
 router.get('/:id/gradebook', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
@@ -130,7 +167,7 @@ router.get('/:id/gradebook', auth(true), authorize({ min: 'instructor' }), async
     // 3. Get all grades for this course
     const grades = await Grade.find({ course: id }).lean();
 
-    // 4. Structure the data
+    // 4. Structure the a
     const gradebookData = students.map(student => {
       const studentGrades = {};
       assignments.forEach(assignment => {

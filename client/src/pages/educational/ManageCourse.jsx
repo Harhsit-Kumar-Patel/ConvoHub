@@ -15,7 +15,11 @@ export default function ManageCourse() {
   const [searchResults, setSearchResults] = useState([]);
   const { toast } = useToast();
 
-  useEffect(() => {
+  // New state for course materials
+  const [materialName, setMaterialName] = useState('');
+  const [materialFile, setMaterialFile] = useState(null);
+
+  const fetchCourseData = () => {
     api.get(`/courses/${id}`)
       .then(res => {
         setCourse(res.data);
@@ -28,6 +32,10 @@ export default function ManageCourse() {
         setStudents(res.data.students || []);
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchCourseData();
   }, [id]);
 
   const handleUpdate = async () => {
@@ -68,6 +76,37 @@ export default function ManageCourse() {
       }
   };
 
+  const handleMaterialUpload = async () => {
+    if (!materialName || !materialFile) {
+      toast({ variant: 'destructive', title: 'Please provide a name and a file.' });
+      return;
+    }
+    const uploadData = new FormData();
+    uploadData.append('name', materialName);
+    uploadData.append('file', materialFile);
+
+    try {
+      await api.post(`/courses/${id}/materials`, uploadData);
+      toast({ title: 'Material uploaded successfully!' });
+      setMaterialName('');
+      setMaterialFile(null);
+      fetchCourseData(); // Refresh course data
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Failed to upload material' });
+    }
+  };
+
+  const handleMaterialDelete = async (materialId) => {
+    if (window.confirm('Are you sure you want to delete this material?')) {
+      try {
+        await api.delete(`/courses/${id}/materials/${materialId}`);
+        toast({ title: 'Material deleted successfully!' });
+        fetchCourseData(); // Refresh course data
+      } catch (err) {
+        toast({ variant: 'destructive', title: 'Failed to delete material' });
+      }
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
 
@@ -80,7 +119,7 @@ export default function ManageCourse() {
         <h1 className="text-4xl font-bold font-heading">Manage: {course.name}</h1>
       </header>
       
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Course Details</CardTitle>
@@ -132,6 +171,35 @@ export default function ManageCourse() {
                         <Button size="sm" variant="destructive" onClick={() => handleRemove(student._id)}>Remove</Button>
                     </div>
                 ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage Materials</CardTitle>
+            <CardDescription>Upload and remove course materials.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="text-sm font-medium">Material Name</label>
+                <input value={materialName} onChange={e => setMaterialName(e.target.value)} className="w-full border rounded-lg px-3 py-2 bg-background" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">File</label>
+                <input type="file" onChange={e => setMaterialFile(e.target.files[0])} className="w-full text-sm" />
+              </div>
+              <Button onClick={handleMaterialUpload}>Upload Material</Button>
+            </div>
+            <h3 className="font-semibold mb-2">Uploaded Materials</h3>
+            <div className="space-y-2">
+              {course.materials.map(material => (
+                <div key={material._id} className="flex justify-between items-center p-2 border rounded">
+                  <p className="text-sm">{material.name}</p>
+                  <Button size="sm" variant="destructive" onClick={() => handleMaterialDelete(material._id)}>Delete</Button>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

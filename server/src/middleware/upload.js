@@ -13,6 +13,6 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: { fileSize: 10000000 }, // Limit file size to 10MB
-}).array('assignmentFiles', 5); // Allows up to 5 files with the field name 'assignmentFiles'
+}).single('file'); // Changed to handle a single file with the field name 'file'
 
 export default upload;
