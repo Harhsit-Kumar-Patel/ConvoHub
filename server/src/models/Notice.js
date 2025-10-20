@@ -6,6 +6,7 @@ const NoticeSchema = new mongoose.Schema(
     body: { type: String, required: true },
     author: { type: String, default: 'Admin' },
     pinned: { type: Boolean, default: false },
+    workspaceType: { type: String, enum: ['educational', 'professional'], required: true },
   },
   { timestamps: true }
 );

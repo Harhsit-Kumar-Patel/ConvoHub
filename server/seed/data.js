@@ -67,8 +67,8 @@ export const courses = [
 ];
 
 export const notices = [
-  { title: 'Mid-sem Exams Timetable (IST)', body: 'Mid-sems will be held from 10th–14th Oct. Centre: Main Academic Block.', pinned: true, author: 'Dean (Academics)' },
-  { title: 'Tech Fest – Kshitij', body: 'Workshops on Robotics & AR/VR this weekend. Registration closes Friday 6 PM IST.' },
+  { title: 'Mid-sem Exams Timetable (IST)', body: 'Mid-sems will be held from 10th–14th Oct. Centre: Main Academic Block.', pinned: true, author: 'Dean (Academics)', workspaceType: 'educational' },
+  { title: 'Tech Fest – Kshitij', body: 'Workshops on Robotics & AR/VR this weekend. Registration closes Friday 6 PM IST.', workspaceType: 'educational' },
 ];
 
 export const assignments = [
@@ -87,16 +87,16 @@ export const assignments = [
 ];
 
 export const teams = [
-    { 
-        name: 'Marketing (India)', 
+    {
+        name: 'Marketing (India)',
         description: 'Pan-India marketing campaigns across Tier-1 & Tier-2 cities.',
         members: [
             professionalUsers.find(u => u.email === 'manager@work.com')._id,
             professionalUsers.find(u => u.email === 'orgadmin@work.com')._id,
         ]
     },
-    { 
-      name: 'Frontend Engineering', 
+    {
+      name: 'Frontend Engineering',
       description: 'Building multilingual UI components (English/Hindi).',
       members: [
         professionalUsers.find(u => u.email === 'lead@work.com')._id,

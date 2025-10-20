@@ -15,10 +15,9 @@ import Direct from './pages/Direct.jsx';
 import Complaints from './pages/Complaints.jsx';
 import Profile from './pages/Profile.jsx';
 import Notices from './pages/Notices.jsx';
+import Announcements from './pages/Announcements.jsx';
 import Courses from './pages/educational/Courses.jsx';
 import CourseDetail from './pages/educational/CourseDetail.jsx';
-import CreateCourse from './pages/educational/CreateCourse.jsx';
-import CreateNotice from './pages/educational/CreateNotice.jsx';
 import Gradebook from './pages/educational/Gradebook.jsx';
 import Grades from './pages/educational/Grades.jsx';
 import CohortChat from './pages/educational/CohortChat.jsx';
@@ -42,7 +41,7 @@ import ProjectPortfolio from './pages/professional/ProjectPortfolio.jsx';
 import ProfessionalUserManagement from './pages/professional/UserManagement.jsx';
 
 import { ToastProvider, ToastViewport } from '@/components/ui/toast.jsx';
-import { NotificationProvider } from './components/NotificationProvider.jsx'; // --- NEW ---
+import { NotificationProvider } from './components/NotificationProvider.jsx';
 
 
 // Main layout component for authenticated users
@@ -94,7 +93,7 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <NotificationProvider> {/* --- NEW --- */}
+      <NotificationProvider>
         <Routes>
           <Route path="/auth" element={<Auth />} />
 
@@ -105,8 +104,7 @@ export default function App() {
               <Route path="/direct" element={<Direct />} />
               <Route path="/complaints" element={<Complaints />} />
               <Route path="/profile" element={<Profile />} />
-              <Route path="/notices" element={<Notices />} />
-
+              
               {isProfessional ? (
                 <>
                   <Route path="/projects" element={<Projects />} />
@@ -115,6 +113,7 @@ export default function App() {
                   <Route path="/teams" element={<TeamChat />} />
                   <Route path="/explore-teams" element={<ExploreTeams />} />
                   <Route path="/directory" element={<Directory />} />
+                  <Route path="/announcements" element={<Announcements />} />
                   <Route path="/team-performance" element={<RoleGuard min="lead"><TeamPerformance /></RoleGuard>} />
                   <Route path="/portfolio" element={<RoleGuard min="manager"><ProjectPortfolio /></RoleGuard>} />
                   <Route path="/user-management" element={<RoleGuard min="org_admin"><ProfessionalUserManagement /></RoleGuard>} />
@@ -128,10 +127,9 @@ export default function App() {
                   <Route path="/courses/:id" element={<CourseDetail />} />
                   <Route path="/grades" element={<Grades />} />
                   <Route path="/calendar" element={<MyCalendar />} />
+                  <Route path="/notices" element={<Notices />} />
 
                   <Route path="/create-assignment" element={<RoleGuard min="instructor"><CreateAssignment /></RoleGuard>} />
-                  <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
-                  <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
                   <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
                   <Route path="/analytics" element={<RoleGuard min="coordinator"><AnalyticsDashboard /></RoleGuard>} />
                   <Route path="/user-management" element={<RoleGuard min="principal"><UserManagement /></RoleGuard>} />
@@ -143,7 +141,7 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
-      </NotificationProvider> {/* --- NEW --- */}
+      </NotificationProvider>
       <ToastViewport />
     </ToastProvider>
   );

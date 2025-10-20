@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import noticesRouter from './notices.js';
+import announcementsRouter from './announcements.js';
 import authRouter from './auth.js';
 import complaintsRouter from './complaints.js';
 import cohortsRouter from './cohorts.js';
@@ -13,11 +14,12 @@ import gradesRouter from './grades.js';
 import analyticsRouter from './analytics.js';
 import notificationsRouter from './notifications.js';
 import calendarRouter from './calendar.js';
-import searchRouter from './search.js'; // --- NEW ---
+import searchRouter from './search.js';
 
 const router = Router();
 
 router.use('/notices', noticesRouter);
+router.use('/announcements', announcementsRouter);
 router.use('/auth', authRouter);
 router.use('/complaints', complaintsRouter);
 router.use('/cohorts', cohortsRouter);
@@ -31,6 +33,6 @@ router.use('/grades', gradesRouter);
 router.use('/analytics', analyticsRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/calendar', calendarRouter);
-router.use('/search', searchRouter); // --- NEW ---
+router.use('/search', searchRouter);
 
 export default router;

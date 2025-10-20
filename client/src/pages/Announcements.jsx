@@ -7,62 +7,61 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/toast';
 
-export default function Notices() {
+export default function Announcements() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedNotice, setSelectedNotice] = useState(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const canManageNotices = hasRoleAtLeast('instructor');
+  const canManageAnnouncements = hasRoleAtLeast('lead');
 
-  const fetchNotices = () => {
+  const fetchAnnouncements = () => {
     setLoading(true);
-    api.get('/notices')
+    api.get('/announcements')
       .then((res) => setItems(res.data))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchNotices();
+    fetchAnnouncements();
   }, []);
 
-  const handleSave = async (noticeData) => {
+  const handleSave = async (announcementData) => {
     try {
-      if (noticeData._id) {
-        await api.put(`/notices/${noticeData._id}`, noticeData);
-        toast({ title: 'Notice updated successfully!' });
+      if (announcementData._id) {
+        await api.put(`/announcements/${announcementData._id}`, announcementData);
+        toast({ title: 'Announcement updated successfully!' });
       } else {
-        await api.post('/notices', noticeData);
-        toast({ title: 'Notice created successfully!' });
+        await api.post('/announcements', announcementData);
+        toast({ title: 'Announcement created successfully!' });
       }
-      fetchNotices();
+      fetchAnnouncements();
       setIsDialogOpen(false);
-      setSelectedNotice(null);
+      setSelectedAnnouncement(null);
     } catch (err) {
-      toast({ variant: 'destructive', title: 'Failed to save notice' });
+      toast({ variant: 'destructive', title: 'Failed to save announcement' });
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this notice?')) {
+    if (window.confirm('Are you sure you want to delete this announcement?')) {
       try {
-        await api.delete(`/notices/${id}`);
-        toast({ title: 'Notice deleted successfully!' });
-        fetchNotices();
+        await api.delete(`/announcements/${id}`);
+        toast({ title: 'Announcement deleted successfully!' });
+        fetchAnnouncements();
       } catch (err) {
-        toast({ variant: 'destructive', title: 'Failed to delete notice' });
+        toast({ variant: 'destructive', title: 'Failed to delete announcement' });
       }
     }
   };
 
-  const openDialog = (notice = null) => {
-    setSelectedNotice(notice);
+  const openDialog = (announcement = null) => {
+    setSelectedAnnouncement(announcement);
     setIsDialogOpen(true);
   };
 
   const filteredItems = useMemo(() => {
-    // Basic filtering logic, can be expanded
     return items;
   }, [items]);
 
@@ -70,11 +69,11 @@ export default function Notices() {
     <section className="p-6">
       <div className="flex justify-between items-center mb-5">
         <div>
-          <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Notices</h2>
+          <h2 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Announcements</h2>
           <p className="text-muted-foreground">Stay in the loop with the latest announcements.</p>
         </div>
-        {canManageNotices && (
-          <Button onClick={() => openDialog()}>Create Notice</Button>
+        {canManageAnnouncements && (
+          <Button onClick={() => openDialog()}>Create Announcement</Button>
         )}
       </div>
 
@@ -86,25 +85,25 @@ export default function Notices() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          {filteredItems.map((notice) => (
+          {filteredItems.map((announcement) => (
             <motion.div
-              key={notice._id}
+              key={announcement._id}
               className="rounded-lg border bg-card text-card-foreground shadow-sm p-4"
               whileHover={{ scale: 1.02 }}
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-lg font-semibold">{notice.title}</h3>
-                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{notice.body}</p>
+                  <h3 className="text-lg font-semibold">{announcement.title}</h3>
+                  <p className="text-muted-foreground mt-1 whitespace-pre-wrap">{announcement.body}</p>
                 </div>
-                {canManageNotices && (
+                {canManageAnnouncements && (
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => openDialog(notice)}>Edit</Button>
-                    <Button variant="destructive" size="sm" onClick={() => handleDelete(notice._id)}>Delete</Button>
+                    <Button variant="outline" size="sm" onClick={() => openDialog(announcement)}>Edit</Button>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(announcement._id)}>Delete</Button>
                   </div>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-2">By {notice.author || 'Admin'} • {new Date(notice.createdAt).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-2">By {announcement.author || 'Admin'} • {new Date(announcement.createdAt).toLocaleString()}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -113,17 +112,17 @@ export default function Notices() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedNotice?._id ? 'Edit Notice' : 'Create Notice'}</DialogTitle>
+            <DialogTitle>{selectedAnnouncement?._id ? 'Edit Announcement' : 'Create Announcement'}</DialogTitle>
             <DialogDescription>
-              {selectedNotice?._id ? 'Update the details of the notice.' : 'Create a new notice for the educational workspace.'}
+              {selectedAnnouncement?._id ? 'Update the details of the announcement.' : 'Create a new announcement for the professional workspace.'}
             </DialogDescription>
           </DialogHeader>
-          <NoticeForm
-            notice={selectedNotice}
+          <AnnouncementForm
+            announcement={selectedAnnouncement}
             onSave={handleSave}
             onCancel={() => {
               setIsDialogOpen(false);
-              setSelectedNotice(null);
+              setSelectedAnnouncement(null);
             }}
           />
         </DialogContent>
@@ -132,12 +131,12 @@ export default function Notices() {
   );
 }
 
-function NoticeForm({ notice, onSave, onCancel }) {
+function AnnouncementForm({ announcement, onSave, onCancel }) {
   const [formData, setFormData] = useState({
-    title: notice?.title || '',
-    body: notice?.body || '',
-    pinned: notice?.pinned || false,
-    _id: notice?._id || null,
+    title: announcement?.title || '',
+    body: announcement?.body || '',
+    pinned: announcement?.pinned || false,
+    _id: announcement?._id || null,
   });
 
   const handleChange = (e) => {
@@ -187,7 +186,7 @@ function NoticeForm({ notice, onSave, onCancel }) {
           onChange={handleChange}
           className="h-4 w-4"
         />
-        <label htmlFor="pinned" className="text-sm">Pin this notice</label>
+        <label htmlFor="pinned" className="text-sm">Pin this announcement</label>
       </div>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
