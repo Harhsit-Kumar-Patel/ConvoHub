@@ -1,5 +1,5 @@
 import { io } from 'socket.io-client';
-import { getUser } from './auth.js';
+import { getToken } from './auth.js';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000/chat';
 
@@ -7,11 +7,15 @@ let socket;
 
 export function getSocket() {
   if (!socket) {
-    socket = io(SOCKET_URL, { transports: ['websocket'] });
-    const user = getUser();
-    if (user?._id || user?.id) {
-      socket.emit('identify', user._id || user.id);
-    }
+    const token = getToken();
+    socket = io(SOCKET_URL, { 
+      transports: ['websocket'],
+      auth: { token } // Send token for authentication
+    });
+    
+    socket.on('connect_error', (err) => {
+      console.error('Socket connection error:', err.message);
+    });
   }
   return socket;
 }
