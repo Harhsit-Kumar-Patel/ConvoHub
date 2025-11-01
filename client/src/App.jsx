@@ -9,6 +9,7 @@ import { getUser } from './lib/auth.js';
 import RoleGuard from './components/RoleGuard.jsx';
 
 // Import all pages
+import Landing from './pages/Landing.jsx';
 import Auth from './pages/Auth.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Direct from './pages/Direct.jsx';
@@ -31,6 +32,7 @@ import Grading from './pages/educational/Grading.jsx';
 import ManageCourse from './pages/educational/ManageCourse.jsx';
 import AnalyticsDashboard from './pages/educational/AnalyticsDashboard.jsx';
 import UserManagement from './pages/educational/UserManagement.jsx';
+import CreateNotice from './pages/educational/CreateNotice.jsx';
 import Projects from './pages/professional/Projects.jsx';
 import ProjectBoard from './pages/professional/ProjectBoard.jsx';
 import TeamChat from './pages/professional/TeamChat.jsx';
@@ -96,11 +98,11 @@ export default function App() {
     <ToastProvider>
       <NotificationProvider>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
-              <Route path="/" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/direct" element={<Direct />} />
               <Route path="/complaints" element={<Complaints />} />
@@ -130,6 +132,7 @@ export default function App() {
                   <Route path="/calendar" element={<MyCalendar />} />
                   <Route path="/notices" element={<Notices />} />
 
+                  <Route path="/create-notice" element={<RoleGuard min="instructor"><CreateNotice /></RoleGuard>} />
                   <Route path="/create-course" element={<RoleGuard min="instructor"><CreateCourse /></RoleGuard>} />
                   <Route path="/create-assignment" element={<RoleGuard min="instructor"><CreateAssignment /></RoleGuard>} />
                   <Route path="/view-complaints" element={<RoleGuard min="coordinator"><ViewComplaints /></RoleGuard>} />
@@ -139,9 +142,22 @@ export default function App() {
                   <Route path="/courses/:id/gradebook" element={<RoleGuard min="instructor"><Gradebook /></RoleGuard>} />
                   <Route path="/courses/:id/manage" element={<RoleGuard min="instructor"><ManageCourse /></RoleGuard>} />
                 </>
-              )}
-            </Route>
+              )}            </Route>
           </Route>
+          
+          {/* Catch-all route for undefined paths */}
+          <Route path="*" element={
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+              <div className="text-center p-8">
+                <h1 className="text-6xl font-bold text-slate-800 mb-4">404</h1>
+                <h2 className="text-2xl font-semibold text-slate-700 mb-4">Page Not Found</h2>
+                <p className="text-slate-600 mb-8">The page you're looking for doesn't exist.</p>
+                <a href="/dashboard" className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-200">
+                  Go to Dashboard
+                </a>
+              </div>
+            </div>
+          } />
         </Routes>
       </NotificationProvider>
       <ToastViewport />

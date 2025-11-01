@@ -30,6 +30,8 @@ afterAll(async () => {
 beforeEach(async () => {
   // Clear all users before each test
   await User.deleteMany({});
+  // Wait a bit to avoid rate limiting between tests
+  await new Promise(resolve => setTimeout(resolve, 100));
 });
 
 describe('POST /api/auth/register', () => {

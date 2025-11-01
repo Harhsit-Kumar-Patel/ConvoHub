@@ -10,11 +10,14 @@ A MERN-based student communication dashboard with real-time chat.
 
 ### Quick Links
 
+- 📋 **[Next Steps Guide](NEXT_STEPS.md)** - Complete roadmap to production
+- ⚡ **[Quick Reference](QUICK_REFERENCE.md)** - Commands and checklist at a glance
+- 🚀 **[Staging Deployment](STAGING_DEPLOYMENT.md)** - Deploy to Render.com in 45 minutes
 - 📊 **[Project Summary](PROJECT_SUMMARY.md)** - Comprehensive project analysis
 - 🚨 **[Deployment Readiness Report](DEPLOYMENT_READINESS_REPORT.md)** - Detailed assessment and issues
-- 🚀 **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Step-by-step deployment instructions
+- 🔧 **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Step-by-step deployment instructions
 - 🔒 **[Security Improvements](SECURITY_IMPROVEMENTS.md)** - Critical security fixes needed
-- ⚡ **[Quick Start Security](QUICK_START_SECURITY.md)** - Fast security implementation (2-3 hours)
+- ⏱️ **[Quick Start Security](QUICK_START_SECURITY.md)** - Fast security implementation (2-3 hours)
 
 ---
 
