@@ -5,6 +5,7 @@ import Course from '../models/Course.js';
 import Assignment from '../models/Assignment.js';
 import Project from '../models/Project.js';
 import Notice from '../models/Notice.js';
+import { getDemoSearchResults, isDemoMode } from '../demo.js';
 
 const router = Router();
 
@@ -22,6 +23,10 @@ router.get('/global', auth(true), async (req, res) => {
       });
     }
 
+    if (isDemoMode()) {
+      return res.json(getDemoSearchResults(q));
+    }
+
     const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
     const limit = 5; // Limit results per category
 
@@ -33,11 +38,8 @@ router.get('/global', auth(true), async (req, res) => {
       Project.find({ $or: [{ name: re }, { description: re }] }).select('name').limit(limit).lean(),
       Notice.find({ $or: [{ title: re }, { body: re }] }).select('title').limit(limit).lean(),
     ]);
-
     res.json({ users, courses, assignments, projects, notices });
-
   } catch (error) {
-    console.error('Global search error:', error);
     res.status(500).json({ message: 'Failed to perform search' });
   }
 });

@@ -1,12 +1,16 @@
 import { Router } from 'express';
 import Notification from '../models/Notification.js';
 import { auth } from '../middleware/auth.js';
+import { getDemoNotifications, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/notifications - Get notifications for the current user
 router.get('/', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoNotifications(req.user.id));
+    }
     const notifications = await Notification.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .limit(50);

@@ -3,11 +3,33 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import User from '../models/User.js';
-import { JWT_SECRET } from '../config.js';
+import { JWT_SECRET, NODE_ENV } from '../config.js';
 import { validateRegister, validateLogin, validate } from '../validators/auth.js';
 import logger from '../logger.js';
+import { getDBStatus } from '../db.js';
+import { educationalUsers, professionalUsers } from '../../seed/data.js';
 
 const router = Router();
+const demoUsers = [...educationalUsers, ...professionalUsers];
+
+function buildAuthPayload(user) {
+  return {
+    id: user._id,
+    role: user.role,
+    name: user.name,
+    workspaceType: user.workspaceType,
+  };
+}
+
+async function tryDemoLogin(email, password) {
+  const demoPassword = process.env.DEMO_PASSWORD || 'password';
+  const matchedUser = demoUsers.find((item) => item.email.toLowerCase() === String(email).toLowerCase());
+
+  if (!matchedUser) return null;
+  if (String(password) !== demoPassword) return null;
+
+  return matchedUser;
+}
 
 // Stricter rate limit for auth routes
 const authLimiter = rateLimit({
@@ -20,6 +42,12 @@ const authLimiter = rateLimit({
 // POST /api/auth/register
 router.post('/register', authLimiter, validateRegister, validate, async (req, res) => {
   try {
+    if (getDBStatus().degraded) {
+      return res.status(503).json({
+        message: 'Registration is unavailable while the database is offline. Start MongoDB or set MONGODB_URI to a live database.',
+      });
+    }
+
     const { name, email, password, workspaceType, role } = req.body;
     if (!name || !email || !password || !workspaceType) {
         return res.status(400).json({ message: 'Missing fields' });
@@ -45,7 +73,7 @@ router.post('/register', authLimiter, validateRegister, validate, async (req, re
     }
     const user = await User.create({ name, email, passwordHash, role: roleToUse, workspaceType });
 
-    const token = jwt.sign({ id: user._id, role: user.role, name: user.name, workspaceType: user.workspaceType }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(buildAuthPayload(user), JWT_SECRET, { expiresIn: '7d' });
     
     logger.info('User registered', { userId: user._id, email: user.email });
     
@@ -65,13 +93,38 @@ router.post('/login', authLimiter, validateLogin, validate, async (req, res) => 
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Missing credentials' });
 
+    if (getDBStatus().degraded && NODE_ENV !== 'production') {
+      const demoUser = await tryDemoLogin(email, password);
+      if (!demoUser) {
+        return res.status(401).json({
+          message: 'Database is offline. In development mode you can log in with a seeded demo account and the demo password.',
+        });
+      }
+
+      const token = jwt.sign(buildAuthPayload(demoUser), JWT_SECRET, { expiresIn: '7d' });
+
+      logger.warn('Demo user logged in without database connection', { email: demoUser.email });
+
+      return res.json({
+        token,
+        user: {
+          id: demoUser._id,
+          name: demoUser.name,
+          email: demoUser.email,
+          role: demoUser.role,
+          workspaceType: demoUser.workspaceType,
+        },
+        mode: 'demo',
+      });
+    }
+
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id, role: user.role, name: user.name, workspaceType: user.workspaceType }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(buildAuthPayload(user), JWT_SECRET, { expiresIn: '7d' });
     
     logger.info('User logged in', { userId: user._id, email: user.email });
     

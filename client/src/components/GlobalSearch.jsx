@@ -43,11 +43,12 @@ export default function GlobalSearch() {
   const navigate = useNavigate();
   const user = getUser();
   const isProfessional = user?.workspaceType === 'professional';
+  const updatesPath = isProfessional ? '/announcements' : '/notices';
 
   // --- NEW: Define static navigation links ---
   const baseNavLinks = [
     { title: 'Dashboard', to: '/dashboard', icon: <Icons.dashboard className="h-4 w-4 text-muted-foreground" /> },
-    { title: 'Announcements', to: '/notices', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" /> },
+    { title: isProfessional ? 'Announcements' : 'Notices', to: updatesPath, icon: <Icons.notice className="h-4 w-4 text-muted-foreground" /> },
     { title: 'Direct Messages', to: '/direct', icon: <Icons.dm className="h-4 w-4 text-muted-foreground" /> },
     { title: 'Profile', to: '/profile', icon: <Icons.profile className="h-4 w-4 text-muted-foreground" /> },
   ];
@@ -105,7 +106,7 @@ export default function GlobalSearch() {
     { key: 'courses', title: 'Courses', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" />, path: (item) => `/courses/${item._id}` },
     { key: 'assignments', title: 'Assignments', icon: <Icons.calendar className="h-4 w-4 text-muted-foreground" />, path: (item) => `/assignments/${item._id}` },
     { key: 'projects', title: 'Projects', icon: <Icons.chat className="h-4 w-4 text-muted-foreground" />, path: (item) => `/projects/${item._id}` },
-    { key: 'notices', title: 'Notices', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" />, path: (item) => `/notices` },
+    { key: 'notices', title: isProfessional ? 'Announcements' : 'Notices', icon: <Icons.notice className="h-4 w-4 text-muted-foreground" />, path: () => updatesPath },
   ];
   
   const filteredNavLinks = query ? navLinks.filter(link => link.title.toLowerCase().includes(query.toLowerCase())) : navLinks;

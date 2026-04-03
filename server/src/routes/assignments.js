@@ -5,6 +5,7 @@ import Grade from '../models/Grade.js'; // Import the Grade model
 import { auth, authorize } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
 import Notification from '../models/Notification.js'; // --- NEW ---
+import { getDemoAssignments, isDemoMode } from '../demo.js';
 
 const router = Router();
 
@@ -13,6 +14,9 @@ const router = Router();
 // GET /api/assignments/me - List assignments for the current user's courses
 router.get('/me', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoAssignments());
+    }
     const userCourses = await Course.find({ students: req.user.id }).select('_id').lean();
     const courseIds = userCourses.map((course) => course._id);
     const items = await Assignment.find({ course: { $in: courseIds } }).sort({ dueDate: 1 });
@@ -25,6 +29,9 @@ router.get('/me', auth(true), async (req, res) => {
 // GET /api/assignments - List all assignments
 router.get('/', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoAssignments());
+    }
     const items = await Assignment.find().sort({ dueDate: 1 });
     res.json(items);
   } catch (e) {
@@ -51,6 +58,13 @@ router.post('/', auth(true), authorize({ min: 'instructor', workspaceOnly: 'educ
 // GET /api/assignments/:id - Get a single assignment by ID
 router.get('/:id', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      const item = getDemoAssignments().find((assignment) => assignment._id === req.params.id);
+      if (!item) {
+        return res.status(404).json({ message: 'Assignment not found' });
+      }
+      return res.json(item);
+    }
     const item = await Assignment.findById(req.params.id);
     if (!item) {
       return res.status(404).json({ message: 'Assignment not found' });
@@ -94,6 +108,9 @@ router.post('/:id/submissions', auth(), upload, async (req, res) => {
 // GET /api/assignments/:id/submissions/me - get current user's submission
 router.get('/:id/submissions/me', auth(), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(null);
+    }
     const id = req.params.id;
     const userId = req.user.id;
     const doc = await Assignment.findById(id).lean();
@@ -110,6 +127,9 @@ router.get('/:id/submissions/me', auth(), async (req, res) => {
 // GET /api/assignments/:id/submissions - Get all submissions for an assignment (instructor+)
 router.get('/:id/submissions', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json([]);
+    }
     const assignment = await Assignment.findById(req.params.id)
       .populate('submissions.student', 'name email')
       .lean();

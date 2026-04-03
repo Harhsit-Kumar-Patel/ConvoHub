@@ -5,12 +5,16 @@ import Grade from '../models/Grade.js';
 import User from '../models/User.js';
 import { auth, authorize } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
+import { getDemoCourses, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/courses - list all courses
 router.get('/', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoCourses());
+    }
     const items = await Course.find().lean();
     res.json(items);
   } catch (e) {
@@ -47,6 +51,11 @@ router.post('/', auth(true), authorize({ min: 'instructor' }), async (req, res) 
 // GET /api/courses/:id - get one course
 router.get('/:id', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      const item = getDemoCourses().find((course) => course._id === req.params.id);
+      if (!item) return res.status(404).json({ message: 'Course not found' });
+      return res.json(item);
+    }
     const item = await Course.findById(req.params.id).populate('students', 'name email').lean();
     if (!item) return res.status(404).json({ message: 'Course not found' });
     res.json(item);
@@ -152,6 +161,19 @@ router.delete('/:id/materials/:materialId', auth(true), authorize({ min: 'instru
 // GET /api/courses/:id/gradebook - Get structured data for a course gradebook
 router.get('/:id/gradebook', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      const course = getDemoCourses().find((item) => item._id === req.params.id);
+      if (!course) return res.status(404).json({ message: 'Course not found' });
+      return res.json({
+        assignments: [],
+        gradebook: course.students.map((student) => ({
+          studentId: student._id,
+          studentName: student.name,
+          grades: {},
+        })),
+      });
+    }
+
     const { id } = req.params;
 
     // 1. Get all assignments for the course to create our columns
@@ -190,7 +212,6 @@ router.get('/:id/gradebook', auth(true), authorize({ min: 'instructor' }), async
     });
 
   } catch (e) {
-    console.error(e);
     res.status(500).json({ message: 'Failed to build gradebook data' });
   }
 });

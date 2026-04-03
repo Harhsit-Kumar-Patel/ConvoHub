@@ -1,12 +1,16 @@
 import { Router } from 'express';
 import Grade from '../models/Grade.js';
 import { auth, authorize } from '../middleware/auth.js';
+import { getDemoGrades, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/grades/me - all grades for current authenticated user (students)
 router.get('/me', auth(), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoGrades().filter((grade) => String(grade.student?._id) === String(req.user.id)));
+    }
     const userId = req.user._id || req.user.id;
     const items = await Grade.find({ student: userId })
       .populate('assignment', 'title')
@@ -23,6 +27,9 @@ router.get('/me', auth(), async (req, res) => {
 // GET /api/grades/all - Get all grades for admin view (Instructor+)
 router.get('/all', auth(true), authorize({ min: 'instructor' }), async (req, res) => {
     try {
+        if (isDemoMode()) {
+            return res.json(getDemoGrades());
+        }
         const items = await Grade.find()
             .populate('student', 'name')
             .populate('assignment', 'title')

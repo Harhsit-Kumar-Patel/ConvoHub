@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import User from '../models/User.js';
 import { auth } from '../middleware/auth.js';
+import { getDemoUsers, isDemoMode } from '../demo.js';
 
 const router = Router();
 
@@ -16,14 +17,25 @@ const hasAdminPrivileges = (user) => {
 
 // GET /api/users/search?q=term
 router.get('/search', auth(true), async (req, res) => {
-  const q = String(req.query.q || '').trim();
-  if (!q) return res.json([]);
-  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-  const items = await User.find({ $or: [{ name: re }, { email: re }] })
-    .select('name email role skills')
-    .limit(20)
-    .lean();
-  res.json(items);
+  try {
+    const q = String(req.query.q || '').trim();
+    if (!q) return res.json([]);
+
+    if (isDemoMode()) {
+      const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      const items = getDemoUsers().filter((user) => re.test(user.name) || re.test(user.email));
+      return res.json(items.slice(0, 20));
+    }
+
+    const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    const items = await User.find({ $or: [{ name: re }, { email: re }] })
+      .select('name email role skills')
+      .limit(20)
+      .lean();
+    res.json(items);
+  } catch (e) {
+    res.status(500).json({ message: 'Failed to fetch users' });
+  }
 });
 
 // GET /api/users/manage - Get all users for management
@@ -32,6 +44,9 @@ router.get('/manage', auth(true), async (req, res) => {
     return res.status(403).json({ message: 'Forbidden' });
   }
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoUsers(req.user.workspaceType));
+    }
     const users = await User.find().select('-passwordHash').sort({ name: 1 }).lean();
     res.json(users);
   } catch (e) {

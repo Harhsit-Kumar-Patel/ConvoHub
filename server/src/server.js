@@ -8,12 +8,13 @@ import morgan from 'morgan';
 import { Server as SocketIOServer } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { CORS_ORIGIN, PORT, JWT_SECRET, NODE_ENV } from './config.js';
-import { connectDB } from './db.js';
+import { connectDB, getDBStatus, markDBDegraded } from './db.js';
 import apiRouter from './routes/index.js';
 import logger from './logger.js';
 
 const app = express();
 const server = http.createServer(app);
+let activePort = Number(PORT);
 
 const io = new SocketIOServer(server, {
   cors: {
@@ -72,11 +73,15 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+  const db = getDBStatus();
+  const status = db.connected ? 'ok' : (db.degraded ? 'degraded' : 'error');
   res.status(200).json({
-    status: 'ok',
+    status,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
+    port: activePort,
+    database: db,
   });
 });
 
@@ -133,13 +138,68 @@ app.use((err, req, res, next) => {
 async function start() {
   try {
     await connectDB();
-    server.listen(PORT, () => {
-      logger.info(`Server running on http://localhost:${PORT}`);
-    });
   } catch (err) {
-    logger.error('Failed to start server', { error: err });
-    process.exit(1);
+    if (NODE_ENV === 'production') {
+      logger.error('Failed to start server', {
+        message: err.message,
+        code: err.code,
+        cause: err.cause?.message,
+      });
+      process.exit(1);
+    }
+
+    markDBDegraded(err);
+    logger.warn(`Starting server in degraded development mode: ${err.message}`);
   }
+
+  await listenWithFallback(Number(PORT));
+}
+
+function listenOnce(port) {
+  return new Promise((resolve, reject) => {
+    const onError = (error) => {
+      server.off('listening', onListening);
+      reject(error);
+    };
+
+    const onListening = () => {
+      server.off('error', onError);
+      activePort = port;
+      const db = getDBStatus();
+      logger.info(`Server running on http://localhost:${port}${db.connected ? '' : ' (database unavailable: degraded mode)'}`);
+      resolve();
+    };
+
+    server.once('error', onError);
+    server.once('listening', onListening);
+    server.listen(port);
+  });
+}
+
+async function listenWithFallback(initialPort) {
+  if (NODE_ENV === 'production') {
+    await listenOnce(initialPort);
+    return;
+  }
+
+  const candidatePorts = [initialPort, initialPort + 1, initialPort + 2];
+
+  for (const port of candidatePorts) {
+    try {
+      await listenOnce(port);
+      if (port !== initialPort) {
+        logger.warn(`Preferred port ${initialPort} was unavailable, using ${port} instead.`);
+      }
+      return;
+    } catch (error) {
+      if (!['EADDRINUSE', 'EPERM'].includes(error.code)) {
+        throw error;
+      }
+      logger.warn(`Port ${port} unavailable (${error.code}), trying another port.`);
+    }
+  }
+
+  throw new Error(`Unable to bind development server to ports ${candidatePorts.join(', ')}.`);
 }
 
 // Graceful shutdown

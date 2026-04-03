@@ -3,12 +3,17 @@ import Team from '../models/Team.js';
 import Project from '../models/Project.js';
 import { auth, authorize } from '../middleware/auth.js';
 import mongoose from 'mongoose';
+import { getDemoTeamPerformance, getDemoTeams, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/teams - list teams for the current user
 router.get('/', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      const items = getDemoTeams().filter((team) => team.members.some((member) => String(member._id) === String(req.user.id)));
+      return res.json(items);
+    }
     const items = await Team.find({ members: req.user.id }).sort({ name: 1 });
     res.json(items);
   } catch (e) {
@@ -19,6 +24,9 @@ router.get('/', auth(true), async (req, res) => {
 // GET /api/teams/all - list all teams available to join
 router.get('/all', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoTeams());
+    }
     // In a real app, you might want pagination here
     const items = await Team.find().sort({ name: 1 }).lean();
     res.json(items);
@@ -30,6 +38,13 @@ router.get('/all', auth(true), async (req, res) => {
 // GET /api/teams/:teamId/performance - Get performance metrics for a team
 router.get('/:teamId/performance', auth(true), authorize({ min: 'lead', workspaceOnly: 'professional' }), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      const data = getDemoTeamPerformance(req.params.teamId);
+      if (!data.length) {
+        return res.status(404).json({ message: 'Team not found' });
+      }
+      return res.json(data);
+    }
     const { teamId } = req.params;
     const team = await Team.findById(teamId).populate('members', 'name').lean();
 
@@ -92,7 +107,6 @@ router.get('/:teamId/performance', auth(true), authorize({ min: 'lead', workspac
 
     res.json(performanceData);
   } catch (e) {
-    console.error('Failed to get team performance', e);
     res.status(500).json({ message: 'Failed to retrieve team performance data' });
   }
 });
@@ -104,6 +118,15 @@ router.post('/', auth(true), async (req, res) => {
     const { name, description } = req.body;
     if (!name || name.trim().length === 0) {
       return res.status(400).json({ message: 'Team name is required.' });
+    }
+
+    if (isDemoMode()) {
+      return res.status(201).json({
+        _id: `demo-team-created-${Date.now()}`,
+        name,
+        description: description || '',
+        members: [req.user.id],
+      });
     }
 
     const newTeam = await Team.create({
@@ -122,6 +145,15 @@ router.post('/', auth(true), async (req, res) => {
 router.post('/:teamId/join', auth(true), async (req, res) => {
   try {
     const { teamId } = req.params;
+
+    if (isDemoMode()) {
+      const team = getDemoTeams().find((item) => item._id === teamId);
+      if (!team) {
+        return res.status(404).json({ message: 'Team not found' });
+      }
+      return res.status(200).json({ message: 'Successfully joined team!', team });
+    }
+
     const userId = new mongoose.Types.ObjectId(req.user.id);
 
     const team = await Team.findByIdAndUpdate(

@@ -3,12 +3,16 @@ import { auth, authorize } from '../middleware/auth.js';
 import Course from '../models/Course.js';
 import User from '../models/User.js';
 import Grade from '../models/Grade.js';
+import { getDemoAnalytics, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/analytics/department - for coordinators and above
 router.get('/department', auth(true), authorize({ min: 'coordinator' }), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoAnalytics());
+    }
     const courses = await Course.find().lean();
     const students = await User.find({ role: 'student' }).lean();
     const grades = await Grade.find().lean();
@@ -43,7 +47,6 @@ router.get('/department', auth(true), authorize({ min: 'coordinator' }), async (
     });
 
   } catch (e) {
-    console.error('Failed to generate analytics:', e);
     res.status(500).json({ message: 'Failed to generate analytics data' });
   }
 });

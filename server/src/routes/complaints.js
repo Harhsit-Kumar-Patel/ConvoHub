@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import Complaint from '../models/Complaint.js';
 import { auth, authorize } from '../middleware/auth.js';
+import { getDemoComplaints, isDemoMode } from '../demo.js';
 
 const router = Router();
 
@@ -10,6 +11,16 @@ router.post('/', auth(true), async (req, res) => {
     const { body, anonymous } = req.body || {};
     if (!body || typeof body !== 'string' || body.trim().length < 5) {
       return res.status(400).json({ message: 'Please provide a valid complaint (min 5 chars)' });
+    }
+    if (isDemoMode()) {
+      return res.status(201).json({
+        _id: `demo-complaint-created-${Date.now()}`,
+        user: anonymous ? undefined : req.user.id,
+        body: body.trim(),
+        anonymous: Boolean(anonymous),
+        status: 'open',
+        createdAt: new Date().toISOString(),
+      });
     }
     const doc = await Complaint.create({
       user: anonymous ? undefined : req.user.id,
@@ -25,6 +36,9 @@ router.post('/', auth(true), async (req, res) => {
 // Get complaints for current user (non-anonymous only)
 router.get('/me', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoComplaints(req.user.id));
+    }
     const items = await Complaint.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.json(items);
   } catch (e) {
@@ -35,6 +49,9 @@ router.get('/me', auth(true), async (req, res) => {
 // GET all complaints (for coordinators and above)
 router.get('/all', auth(true), authorize({ min: 'coordinator', workspaceOnly: 'educational' }), async (req, res) => {
     try {
+      if (isDemoMode()) {
+        return res.json(getDemoComplaints(req.user.id, true));
+      }
       const items = await Complaint.find({}).sort({ createdAt: -1 });
       res.json(items);
     } catch (e) {

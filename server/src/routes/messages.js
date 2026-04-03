@@ -3,12 +3,16 @@ import mongoose from 'mongoose';
 import Message from '../models/Message.js';
 import Notification from '../models/Notification.js'; // --- NEW ---
 import { auth } from '../middleware/auth.js';
+import { getDemoRecentThreads, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/messages?cohortId=... | toUser=... | teamId=...
 router.get('/', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json([]);
+    }
     const { cohortId, toUser, teamId, limit = 50 } = req.query; // Add teamId
     const q = {};
     if (cohortId) q.toCohort = new mongoose.Types.ObjectId(cohortId);
@@ -90,6 +94,9 @@ router.post('/', auth(true), async (req, res) => {
 // Recent DM threads for the authenticated user
 router.get('/recent-threads', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoRecentThreads(req.user.id));
+    }
     const me = new mongoose.Types.ObjectId(String(req.user.id));
     const pipeline = [
       { $match: { toUser: { $exists: true, $ne: null }, $or: [{ from: me }, { toUser: me }] } },

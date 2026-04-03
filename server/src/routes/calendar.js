@@ -2,12 +2,16 @@ import { Router } from 'express';
 import Assignment from '../models/Assignment.js';
 import Event from '../models/Event.js';
 import { auth, authorize } from '../middleware/auth.js';
+import { getDemoCalendarItems, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/calendar/items - Get all items for the calendar view
 router.get('/items', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoCalendarItems());
+    }
     const { workspaceType } = req.user;
 
     // Fetch assignments
@@ -41,6 +45,19 @@ router.post('/events', auth(true), authorize({ min: 'instructor' }), async (req,
         const { title, start, end, allDay } = req.body;
         if (!title || !start || !end) {
             return res.status(400).json({ message: 'Title, start, and end dates are required.' });
+        }
+
+        if (isDemoMode()) {
+            return res.status(201).json({
+                _id: `demo-event-${Date.now()}`,
+                title,
+                start: new Date(start),
+                end: new Date(end),
+                allDay: !!allDay,
+                createdBy: req.user.id,
+                workspaceType: req.user.workspaceType,
+                type: 'event',
+            });
         }
 
         const newEvent = await Event.create({

@@ -2,12 +2,16 @@ import { Router } from 'express';
 import Project from '../models/Project.js';
 import { auth, authorize } from '../middleware/auth.js';
 import mongoose from 'mongoose';
+import { getDemoProjects, isDemoMode } from '../demo.js';
 
 const router = Router();
 
 // GET /api/projects - List all projects
 router.get('/', auth(true), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      return res.json(getDemoProjects());
+    }
     // In a real app, you'd filter projects by the user's workspace/team
     const items = await Project.find().sort({ createdAt: -1 });
     res.json(items);
@@ -19,6 +23,15 @@ router.get('/', auth(true), async (req, res) => {
 // GET /api/projects/my-tasks - Get all tasks assigned to the current user
 router.get('/my-tasks', auth(true), authorize({ workspaceOnly: 'professional' }), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      const items = getDemoProjects()
+        .map((project) => ({
+          ...project,
+          tasks: project.tasks.filter((task) => String(task.assignee) === String(req.user.id)),
+        }))
+        .filter((project) => project.tasks.length > 0);
+      return res.json(items);
+    }
     const userId = new mongoose.Types.ObjectId(req.user.id);
     const projectsWithMyTasks = await Project.aggregate([
       {
@@ -40,7 +53,6 @@ router.get('/my-tasks', auth(true), authorize({ workspaceOnly: 'professional' })
     ]);
     res.json(projectsWithMyTasks);
   } catch (e) {
-    console.error('Failed to fetch my tasks', e);
     res.status(500).json({ message: 'Failed to fetch assigned tasks' });
   }
 });
@@ -48,6 +60,26 @@ router.get('/my-tasks', auth(true), authorize({ workspaceOnly: 'professional' })
 // GET /api/projects/portfolio - Get a high-level overview of all projects
 router.get('/portfolio', auth(true), authorize({ min: 'manager', workspaceOnly: 'professional' }), async (req, res) => {
   try {
+    if (isDemoMode()) {
+      const results = getDemoProjects().map((project) => {
+        const counts = { todo: 0, 'in-progress': 0, done: 0 };
+        project.tasks.forEach((task) => {
+          if (counts[task.status] !== undefined) counts[task.status] += 1;
+        });
+        const totalTasks = project.tasks.length;
+        const progress = totalTasks > 0 ? Math.round((counts.done / totalTasks) * 100) : 0;
+        return {
+          _id: project._id,
+          name: project.name,
+          description: project.description,
+          totalTasks,
+          taskCounts: counts,
+          progress,
+          createdAt: project.createdAt,
+        };
+      });
+      return res.json(results);
+    }
     const portfolioData = await Project.aggregate([
       { $unwind: { path: '$tasks', preserveNullAndEmptyArrays: true } },
       {
@@ -114,7 +146,6 @@ router.get('/portfolio', auth(true), authorize({ min: 'manager', workspaceOnly: 
 
     res.json(results);
   } catch (e) {
-    console.error('Failed to get project portfolio', e);
     res.status(500).json({ message: 'Failed to retrieve project portfolio' });
   }
 });

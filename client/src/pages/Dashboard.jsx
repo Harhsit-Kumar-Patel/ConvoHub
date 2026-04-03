@@ -54,13 +54,14 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const user = getUser();
     const mode = (user?.workspaceType === 'professional' || user?.workspaceType === 'educational') ? user.workspaceType : 'educational';
+    const noticesPath = mode === 'professional' ? '/announcements' : '/notices';
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
                 const [noticesRes, threadsRes] = await Promise.all([
-                    api.get('/notices'),
+                    api.get(noticesPath),
                     api.get('/messages/recent-threads')
                 ]);
 
@@ -82,7 +83,7 @@ export default function Dashboard() {
         };
 
         fetchData();
-    }, []);
+    }, [noticesPath]);
 
     return (
         <motion.div 
@@ -108,7 +109,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     <Button asChild variant="outline" className="h-auto py-3"><Link to="/direct">{mode === 'educational' ? 'New Chat' : 'New Message'}</Link></Button>
                     <Button asChild variant="outline" className="h-auto py-3"><Link to={mode === 'educational' ? '/courses' : '/projects'}>{mode === 'educational' ? 'Courses' : 'Projects'}</Link></Button>
-                    <Button asChild variant="outline" className="h-auto py-3"><Link to="/notices">{mode === 'educational' ? 'Announcements' : 'Notices'}</Link></Button>
+                    <Button asChild variant="outline" className="h-auto py-3"><Link to={noticesPath}>{mode === 'educational' ? 'Announcements' : 'Notices'}</Link></Button>
                     {mode === 'professional' && (
                         <>
                             <Button asChild variant="outline" className="h-auto py-3"><Link to="/teams">Team Chat</Link></Button>
@@ -150,7 +151,7 @@ export default function Dashboard() {
                             <motion.div className="space-y-2" variants={containerVariants} initial="hidden" animate="visible">
                                 {activityFeed.length > 0 ? activityFeed.map((item, index) => (
                                     <motion.div key={`${item.type}-${item._id || index}`} variants={itemVariants} className="group transition-all duration-300 ease-in-out">
-                                        <Link to={item.type === 'notice' ? '/notices' : '/direct'} className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent hover:shadow-md transform group-hover:scale-[1.02]">
+                                        <Link to={item.type === 'notice' ? noticesPath : '/direct'} className="flex items-center gap-4 p-3 rounded-lg hover:bg-accent hover:shadow-md transform group-hover:scale-[1.02]">
                                             <div className={`w-10 h-10 rounded-full ${item.type === 'notice' ? 'bg-primary/10' : 'bg-secondary/10'} flex-shrink-0 flex items-center justify-center`}>
                                                 {item.type === 'notice' ? <Icons.notice className="w-5 h-5 text-primary" /> : <span className="font-bold text-secondary text-xs">{(item.user?.name || 'U').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}</span>}
                                             </div>
