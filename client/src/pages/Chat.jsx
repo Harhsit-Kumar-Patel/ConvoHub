@@ -29,8 +29,10 @@ export default function Chat() {
     socket.emit('joinCohort', cohortId);
     api.get('/messages', { params: { cohortId } }).then((res) => setMessages(res.data || []));
 
-    const onCohort = (msg) => {
-      if (msg.cohortId === cohortId) setMessages((m) => [...m, msg]);
+    const onCohort = (payload) => {
+      if (payload.cohortId === cohortId && payload.message) {
+        setMessages((m) => [...m, payload.message]);
+      }
     };
     socket.on('cohortMessage', onCohort);
     return () => {

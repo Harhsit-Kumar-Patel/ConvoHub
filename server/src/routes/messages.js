@@ -3,7 +3,12 @@ import mongoose from 'mongoose';
 import Message from '../models/Message.js';
 import Notification from '../models/Notification.js'; // --- NEW ---
 import { auth } from '../middleware/auth.js';
-import { getDemoRecentThreads, isDemoMode } from '../demo.js';
+import {
+  createDemoDirectMessage,
+  getDemoDirectMessages,
+  getDemoRecentThreads,
+  isDemoMode,
+} from '../demo.js';
 
 const router = Router();
 
@@ -11,6 +16,9 @@ const router = Router();
 router.get('/', auth(true), async (req, res) => {
   try {
     if (isDemoMode()) {
+      if (req.query.toUser) {
+        return res.json(getDemoDirectMessages(req.user.id, req.query.toUser, req.query.limit));
+      }
       return res.json([]);
     }
     const { cohortId, toUser, teamId, limit = 50 } = req.query; // Add teamId
@@ -37,6 +45,28 @@ router.post('/', auth(true), async (req, res) => {
   try {
     const { body, cohortId, toUser, teamId } = req.body || {}; // Add teamId
     if (!body || (!cohortId && !toUser && !teamId)) return res.status(400).json({ message: 'Invalid payload' }); // Add teamId check
+
+    if (isDemoMode()) {
+      if (!toUser || cohortId || teamId) {
+        return res.status(503).json({ message: 'Demo mode only supports direct messages while MongoDB is offline' });
+      }
+
+      const populatedDoc = createDemoDirectMessage({
+        fromUserId: req.user.id,
+        toUserId: toUser,
+        body,
+      });
+
+      const io = req.app.get('io');
+      io.of('/chat').to(`user:${toUser}`).emit('directMessage', {
+        message: populatedDoc,
+      });
+      io.of('/chat').to(`user:${req.user.id}`).emit('directMessage', {
+        message: populatedDoc,
+      });
+
+      return res.status(201).json(populatedDoc);
+    }
 
     const doc = await Message.create({
       from: req.user.id,

@@ -14,6 +14,7 @@ export async function connectDB() {
     await mongoose.connect(MONGODB_URI, {
       serverSelectionTimeoutMS: 5000,
     });
+    await mongoose.connection.db.collection('users').findOne({ _id: null });
     dbStatus = {
       connected: true,
       degraded: false,
@@ -27,9 +28,11 @@ export async function connectDB() {
       lastError: error,
     };
 
-    if (code === 'ECONNREFUSED' || code === 'EPERM') {
-      const friendlyError = new Error(
-        `Unable to connect to MongoDB at ${MONGODB_URI}. Make sure MongoDB is running, or update MONGODB_URI in server/.env to a reachable local or Atlas instance.`
+    if (code === 'ECONNREFUSED' || code === 'EPERM' || code === 13) {
+      const isAuthError = code === 13 || /auth/i.test(String(error?.message || ''));
+      const friendlyError = new Error(isAuthError
+        ? `MongoDB rejected database access for ${MONGODB_URI}. If you are using the Docker MongoDB from a local server, set MONGODB_URI=mongodb://admin:changeme@127.0.0.1:27017/convohub?authSource=admin in server/.env.`
+        : `Unable to connect to MongoDB at ${MONGODB_URI}. Make sure MongoDB is running, or update MONGODB_URI in server/.env to a reachable local or Atlas instance.`
       );
       friendlyError.code = code;
       friendlyError.cause = error;

@@ -12,7 +12,9 @@ export default function Direct() {
   const [toUser, setToUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [error, setError] = useState('');
   const me = getUser();
+  const meId = String(me?._id || me?.id || '');
 
   const socket = useMemo(() => getSocket(), []);
 
@@ -24,29 +26,38 @@ export default function Direct() {
 
       // The active conversation is between 'me' and 'toUser'
       // Check if the incoming message is part of this conversation
-      const isFromCurrentUser = message.from._id === me.id;
-      const isToCurrentUser = message.toUser === me.id;
-      const isFromPeer = message.from._id === toUser._id;
-      const isToPeer = message.toUser === toUser._id;
+      const fromId = String(message.from?._id || message.from || '');
+      const toId = String(message.toUser?._id || message.toUser || '');
+      const peerId = String(toUser._id);
+      const isFromCurrentUser = fromId === meId;
+      const isToCurrentUser = toId === meId;
+      const isFromPeer = fromId === peerId;
+      const isToPeer = toId === peerId;
 
       // Add to state if (I sent it to the peer) OR (the peer sent it to me)
       if ((isFromCurrentUser && isToPeer) || (isFromPeer && isToCurrentUser)) {
-        setMessages((prevMessages) => [...prevMessages, message]);
+        setMessages((prevMessages) => (
+          prevMessages.some((item) => item._id === message._id)
+            ? prevMessages
+            : [...prevMessages, message]
+        ));
       }
     };
 
     socket.on('directMessage', onDM);
     return () => socket.off('directMessage', onDM);
-  }, [socket, toUser, me]);
+  }, [socket, toUser, meId]);
 
   async function search() {
     if (!query.trim()) return;
+    setError('');
     const res = await api.get('/users/search', { params: { q: query } });
-    setResults((res.data || []).filter(u => u._id !== me.id));
+    setResults((res.data || []).filter(u => String(u._id) !== meId));
   }
 
   async function openThread(user) {
     setToUser(user);
+    setError('');
     const res = await api.get('/messages', { params: { toUser: user._id } });
     setMessages(res.data || []);
   }
@@ -54,8 +65,14 @@ export default function Direct() {
   async function send() {
     if (!input.trim() || !toUser) return;
     // The backend will echo the message via socket, which the useEffect handler will catch.
-    await api.post('/messages', { body: input, toUser: toUser._id });
-    setInput('');
+    setError('');
+    try {
+      const messageBody = input;
+      await api.post('/messages', { body: messageBody, toUser: toUser._id });
+      setInput('');
+    } catch (err) {
+      setError(err?.response?.data?.message || 'Failed to send message');
+    }
   }
 
   return (
@@ -97,7 +114,7 @@ export default function Direct() {
 
               <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
                 {messages.map((m, i) => {
-                  const isMe = me?.id && (m.from?._id === me.id);
+                  const isMe = meId && (String(m.from?._id || m.from || '') === meId);
                   const time = new Date(m.createdAt || m.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                   return (
                     <div key={m._id || i} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
@@ -113,6 +130,7 @@ export default function Direct() {
                 <input className="flex-1 border rounded-lg px-3 py-2 bg-background" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }} placeholder="Type a message" />
                 <Button onClick={send} disabled={!toUser}>Send</Button>
               </div>
+              {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
             </>
           ) : (
             <div className="h-full w-full flex items-center justify-center">

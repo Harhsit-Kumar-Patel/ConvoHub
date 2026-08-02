@@ -1,7 +1,10 @@
 import { io } from 'socket.io-client';
 import { getToken } from './auth.js';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000/chat';
+const configuredSocketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+const SOCKET_URL = configuredSocketUrl.endsWith('/chat')
+  ? configuredSocketUrl
+  : `${configuredSocketUrl.replace(/\/$/, '')}/chat`;
 
 let socket;
 

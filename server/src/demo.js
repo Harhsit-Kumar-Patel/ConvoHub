@@ -23,12 +23,44 @@ const professionalAnnouncements = [
   },
 ];
 
+const demoDirectMessages = [];
+
 function serializeUser(user) {
   return {
     ...user,
     _id: String(user._id),
     passwordHash: undefined,
   };
+}
+
+export function getDemoDirectMessages(currentUserId, otherUserId, limit = 50) {
+  const me = String(currentUserId);
+  const other = String(otherUserId);
+  return demoDirectMessages
+    .filter((message) => {
+      const from = String(message.from?._id || message.from || '');
+      const to = String(message.toUser || '');
+      return (from === me && to === other) || (from === other && to === me);
+    })
+    .slice(-Math.min(Number(limit) || 50, 200));
+}
+
+export function createDemoDirectMessage({ fromUserId, toUserId, body }) {
+  const sender = getDemoUsers().find((user) => String(user._id) === String(fromUserId));
+  const message = {
+    _id: `demo-message-${Date.now()}-${demoDirectMessages.length + 1}`,
+    from: {
+      _id: String(fromUserId),
+      name: sender?.name || 'Demo User',
+    },
+    toUser: String(toUserId),
+    body: String(body),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  demoDirectMessages.push(message);
+  return message;
 }
 
 export function isDemoMode() {
